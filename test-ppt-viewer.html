@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPT查看器测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <h1>PPT查看器功能测试</h1>
+
+    <div class="test-section">
+        <h2>测试1：检查后端服务</h2>
+        <button onclick="testBackend()">测试后端连接</button>
+        <div id="backend-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>测试2：获取课件列表</h2>
+        <button onclick="testCoursewareList()">获取课件列表</button>
+        <div id="courseware-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>测试3：测试预览API</h2>
+        <label>课件ID: <input type="number" id="courseware-id" value="2" min="1"></label>
+        <button onclick="testPreviewAPI()">测试预览</button>
+        <div id="preview-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>测试4：显示图片</h2>
+        <button onclick="showImages()">显示预览图片</button>
+        <div id="images-result" class="result"></div>
+    </div>
+
+    <script>
+        async function testBackend() {
+            const resultDiv = document.getElementById('backend-result');
+            resultDiv.textContent = '正在测试...';
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/courseware');
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = '✅ 后端服务正常运行！\n状态码: ' + response.status;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = '❌ 后端返回错误\n状态码: ' + response.status;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ 无法连接到后端服务\n错误: ' + error.message;
+            }
+        }
+
+        async function testCoursewareList() {
+            const resultDiv = document.getElementById('courseware-result');
+            resultDiv.textContent = '正在获取...';
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/courseware');
+                const data = await response.json();
+                
+                resultDiv.className = 'result success';
+                resultDiv.textContent = '✅ 成功获取课件列表\n\n' + 
+                    '课件数量: ' + data.length + '\n\n' +
+                    'PPT课件:\n' +
+                    data.filter(c => c.fileType === 'ppt' || c.fileType === 'pptx')
+                        .map(c => `ID: ${c.id}, 标题: ${c.title}, 类型: ${c.fileType}`)
+                        .join('\n');
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ 获取失败\n错误: ' + error.message;
+            }
+        }
+
+        async function testPreviewAPI() {
+            const coursewareId = document.getElementById('courseware-id').value;
+            const resultDiv = document.getElementById('preview-result');
+            resultDiv.textContent = '正在测试...';
+            
+            try {
+                const url = `http://localhost:5000/api/courseware/${coursewareId}/preview`;
+                console.log('请求URL:', url);
+                
+                const response = await fetch(url);
+                console.log('响应状态:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('返回数据:', data);
+                
+                resultDiv.className = 'result success';
+                resultDiv.textContent = '✅ 预览API工作正常！\n\n' +
+                    JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ 预览API失败\n错误: ' + error.message;
+                console.error('详细错误:', error);
+            }
+        }
+
+        async function showImages() {
+            const coursewareId = document.getElementById('courseware-id').value;
+            const resultDiv = document.getElementById('images-result');
+            resultDiv.textContent = '正在加载...';
+            
+            try {
+                const response = await fetch(`http://localhost:5000/api/courseware/${coursewareId}/preview`);
+                const data = await response.json();
+                
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = '<h3>✅ 预览图片：</h3>';
+                
+                data.slides.forEach((slide, index) => {
+                    const img = document.createElement('img');
+                    img.src = slide.imageUrl;
+                    img.style.maxWidth = '100%';
+                    img.style.margin = '10px 0';
+                    img.style.border = '2px solid #667eea';
+                    img.style.borderRadius = '8px';
+                    
+                    const caption = document.createElement('p');
+                    caption.textContent = `第 ${slide.page} 页`;
+                    caption.style.textAlign = 'center';
+                    caption.style.fontWeight = 'bold';
+                    
+                    resultDiv.appendChild(caption);
+                    resultDiv.appendChild(img);
+                });
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ 加载图片失败\n错误: ' + error.message;
+            }
+        }
+
+        // 页面加载时自动测试后端
+        window.onload = function() {
+            testBackend();
+        };
+    </script>
+</body>
+</html>

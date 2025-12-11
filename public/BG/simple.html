@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal</title>
+
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- 配置自定义颜色和字体 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        dark: '#334155',
+                        light: '#f0f4f8',
+                        border: '#e2e8f0',
+                        white: '#ffffff'
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                },
+            }
+        }
+    </script>
+
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      /* .section-gap {
+       @apply my-10 md:my-16;
+      } */
+    }
+  </style>
+
+    <!-- 引入Inter字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+
+<body class="bg-light text-dark font-inter">
+    <!-- 导航栏 - 固定顶部，滚动时变化样式 -->
+    <header id="navbar" class="fixed top-0 left-0 w-full py-4 transition-all duration-300 z-50">
+        <div class="max-w-1000px mx-auto px-6 flex justify-between items-center">
+            <!-- Logo -->
+            <a href="#" class="text-lg font-semibold">Minimal</a>
+
+            <!-- 桌面端导航链接 -->
+            <nav class="hidden md:flex space-x-8">
+                <a href="#about" class="text-sm font-medium hover:text-primary transition-colors">About</a>
+                <a href="#work" class="text-sm font-medium hover:text-primary transition-colors">Work</a>
+                <a href="#contact" class="text-sm font-medium hover:text-primary transition-colors">Contact</a>
+            </nav>
+
+            <!-- 移动端汉堡菜单按钮 -->
+            <button id="menuBtn" class="md:hidden focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
+                    </path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- 移动端菜单 (默认隐藏) -->
+        <div id="mobileMenu" class="hidden md:hidden bg-white border-t border-border mt-4">
+            <div class="max-w-1000px mx-auto px-6 py-4 flex flex-col space-y-4">
+                <a href="#about" class="text-sm font-medium hover:text-primary transition-colors">About</a>
+                <a href="#work" class="text-sm font-medium hover:text-primary transition-colors">Work</a>
+                <a href="#contact" class="text-sm font-medium hover:text-primary transition-colors">Contact</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero区 - 占屏幕高度60%(桌面)80%(移动) -->
+        <section class="h-[80vh] md:h-[60vh] flex items-center justify-center px-6">
+            <div class="text-center">
+                <h1 class="text-[2rem] md:text-[2.5rem] font-semibold leading-tight mb-4">Simple is better</h1>
+                <p class="text-border text-base md:text-lg">Clean design for everyone</p>
+            </div>
+        </section>
+
+        <!-- 内容区 - 最大宽度1000px居中 -->
+        <div class="max-w-1000px mx-auto px-6">
+            <!-- About部分 -->
+            <section id="about" class="section-gap">
+                <h2 class="text-[1.5rem] font-medium mb-4">About</h2>
+                <div class="border-t border-border pt-6">
+                    <p class="mb-6 leading-relaxed">
+                        We believe in minimalism as a design philosophy. By removing the unnecessary,
+                        we highlight what truly matters. Our work focuses on clarity, functionality,
+                        and thoughtful content presentation.
+                    </p>
+                    <p class="leading-relaxed">
+                        With years of experience in creating clean, effective designs, we help
+                        individuals and businesses communicate their message with simplicity and impact.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Work部分 - 极简卡片展示 -->
+            <section id="work" class="section-gap">
+                <h2 class="text-[1.5rem] font-medium mb-4">Work</h2>
+                <div class="border-t border-border pt-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- 项目卡片1 -->
+                        <a href="#"
+                            class="block border border-border bg-white p-4 hover:border-primary transition-colors">
+                            <img src="https://picsum.photos/seed/project1/600/400" alt="Project example"
+                                class="w-full h-48 object-cover mb-4">
+                            <h3 class="text-base font-medium">Minimal Portfolio</h3>
+                        </a>
+
+                        <!-- 项目卡片2 -->
+                        <a href="#"
+                            class="block border border-border bg-white p-4 hover:border-primary transition-colors">
+                            <img src="https://picsum.photos/seed/project2/600/400" alt="Project example"
+                                class="w-full h-48 object-cover mb-4">
+                            <h3 class="text-base font-medium">Clean Blog Design</h3>
+                        </a>
+
+                        <!-- 项目卡片3 -->
+                        <a href="#"
+                            class="block border border-border bg-white p-4 hover:border-primary transition-colors">
+                            <img src="https://picsum.photos/seed/project3/600/400" alt="Project example"
+                                class="w-full h-48 object-cover mb-4">
+                            <h3 class="text-base font-medium">Content Focused Site</h3>
+                        </a>
+
+                        <!-- 项目卡片4 -->
+                        <a href="#"
+                            class="block border border-border bg-white p-4 hover:border-primary transition-colors">
+                            <img src="https://picsum.photos/seed/project4/600/400" alt="Project example"
+                                class="w-full h-48 object-cover mb-4">
+                            <h3 class="text-base font-medium">Simplicity Redefined</h3>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Contact部分 -->
+            <section id="contact" class="section-gap">
+                <h2 class="text-[1.5rem] font-medium mb-4">Contact</h2>
+                <div class="border-t border-border pt-6">
+                    <p class="mb-6 leading-relaxed">
+                        Interested in working together? Let's discuss your project and how we can
+                        create something simple and effective.
+                    </p>
+                    <a href="mailto:hello@minimal.com"
+                        class="inline-block bg-primary text-white px-5 py-2 text-sm font-medium hover:bg-primary/90 transition-colors">
+                        Get in touch
+                    </a>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="py-10 border-t border-border mt-10">
+        <div class="max-w-1000px mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <p class="text-sm mb-4 md:mb-0">© 2024 Minimal</p>
+
+                <!-- 社交媒体图标 -->
+                <div class="flex space-x-6">
+                    <a href="#" class="text-dark hover:text-primary transition-colors">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z" />
+                        </svg>
+                    </a>
+
+                    <a href="#" class="text-dark hover:text-primary transition-colors">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                        </svg>
+                    </a>
+
+                    <a href="#" class="text-dark hover:text-primary transition-colors">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-2 16h-2v-6h2v6zm-1-6.891c-.607 0-1.1-.496-1.1-1.109 0-.612.492-1.109 1.1-1.109s1.1.497 1.1 1.109c0 .613-.493 1.109-1.1 1.109zm8 6.891h-1.998v-2.861c0-1.881-2.002-1.722-2.002 0v2.861h-2v-6h2v1.093c.872-1.616 4-1.736 4 1.548v3.359z" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript - 仅用于汉堡菜单和导航栏滚动效果 -->
+    <script>
+        // 导航栏滚动效果
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            navbar.classList.toggle('bg-white', window.scrollY > 10);
+            navbar.classList.toggle('border-b', window.scrollY > 10);
+            navbar.classList.toggle('border-border', window.scrollY > 10);
+        });
+
+        // 移动端菜单切换
+        const menuBtn = document.getElementById('menuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+    </script>
+</body>
+
+</html>
