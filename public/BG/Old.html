@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>老时光 - 复古回忆</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入复古风格字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime&family=Playfair+Display:ital@0;1&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- 配置Tailwind自定义颜色和字体 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        paper: '#F5F0E1',       // 米黄底色，模拟旧报纸
+                        brown: '#8B4513',       // 赭石棕，主文字/边框
+                        retroRed: '#9E2A2B',    // 复古红，强调按钮/标题
+                        lightBrown: '#D2B48C',  // 浅咖，次要文字
+                        fadedBlue: 'rgba(135, 206, 235, 0.6)' // 褪色蓝，小装饰
+                    },
+                    fontFamily: {
+                        typewriter: ['Special Elite', 'Courier Prime', 'Courier New', 'monospace'],
+                        serif: ['Playfair Display', 'Georgia', 'serif'],
+                        handwritten: ['Caveat', 'cursive']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.1);
+            }
+            .text-stroke {
+                -webkit-text-stroke: 1px #8B4513;
+            }
+            .vintage-border {
+                border: 3px solid #8B4513;
+                box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+                position: relative;
+            }
+            .vintage-border::after {
+                content: "";
+                position: absolute;
+                top: 3px;
+                left: 3px;
+                right: 3px;
+                bottom: 3px;
+                border: 1px solid #D2B48C;
+                pointer-events: none;
+            }
+            /* 纸质纹理效果 - 使用SVG噪点图案 */
+            .paper-texture {
+                background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.1'/%3E%3C/svg%3E");
+            }
+            .newspaper-texture {
+                background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.2'/%3E%3C/svg%3E");
+            }
+            .envelope-texture {
+                background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%238b4513' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+            }
+            /* 复古滤镜效果 */
+            .vintage-filter {
+                filter: saturate(0.9) sepia(0.05);
+            }
+            /* 复古虚线分隔线 */
+            .dashed-divider {
+                background-image: linear-gradient(to right, #8B4513 50%, transparent 50%);
+                background-size: 10px 2px;
+                background-repeat: repeat-x;
+            }
+            /* 碎花分隔线 */
+            .floral-divider {
+                background-color: #F5F0E1;
+                background-image: url("data:image/svg+xml,%3Csvg width='60' height='15' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 7.5c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-20 0c2.76 0 5-2.24 5-5S12.76 2.5 10 2.5 5 4.74 5 7.5s2.24 5 5 5zm40 0c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5z' fill='%238b4513' fill-opacity='0.3'/%3E%3C/svg%3E");
+                height: 15px;
+            }
+            /* 老式胶带效果 */
+            .tape {
+                position: relative;
+            }
+            .tape::before {
+                content: "";
+                position: absolute;
+                width: 100px;
+                height: 30px;
+                background-color: rgba(210, 180, 140, 0.3);
+                transform: rotate(-3deg);
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                z-index: 1;
+            }
+            .tape-top::before {
+                top: -15px;
+                left: 50%;
+                transform: translateX(-50%) rotate(-2deg);
+            }
+            /* 老照片显影效果 */
+            .image-fade-in {
+                animation: fadeIn 1s ease-in-out;
+            }
+            @keyframes fadeIn {
+                0% { 
+                    opacity: 0;
+                    filter: blur(5px) grayscale(100%) brightness(0.8);
+                }
+                100% { 
+                    opacity: 1;
+                    filter: blur(0) grayscale(0%) brightness(1);
+                }
+            }
+            /* 滚动滑入动画 */
+            .slide-in {
+                opacity: 0;
+                transform: translateX(-30px);
+                transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+            }
+            .slide-in.visible {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            .slide-in-right {
+                opacity: 0;
+                transform: translateX(30px);
+                transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+            }
+            .slide-in-right.visible {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            /* 打字机效果 */
+            .typewriter {
+                overflow: hidden;
+                border-right: 0.15em solid #8B4513;
+                white-space: nowrap;
+                margin: 0 auto;
+                animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+            }
+            @keyframes typing {
+                from { width: 0 }
+                to { width: 100% }
+            }
+            @keyframes blink-caret {
+                from, to { border-color: transparent }
+                50% { border-color: #8B4513 }
+            }
+        }
+    </style>
+</head>
+<body class="bg-paper paper-texture text-brown font-serif">
+    <!-- 页面容器 - 模拟报纸宽度 -->
+    <div class="max-w-[900px] mx-auto px-4 md:px-8">
+        <!-- 顶部复古招牌（导航） -->
+        <header id="navbar" class="bg-retroRed newspaper-texture h-15 md:h-16 my-6 relative shadow-md transition-all duration-300">
+            <!-- 磨损毛边效果 -->
+            <div class="absolute inset-0 shadow-[0_0_5px_rgba(0,0,0,0.1)] pointer-events-none"></div>
+            
+            <div class="container mx-auto px-4 h-full flex justify-between items-center">
+                <!-- 复古Logo -->
+                <div class="flex items-center space-x-2">
+                    <svg class="w-8 h-8 text-paper" viewBox="0 0 24 24" fill="currentColor">
+                        <!-- 老式相机简笔画 -->
+                        <circle cx="12" cy="12" r="6" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <rect x="8" y="8" width="8" height="8" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <circle cx="18" cy="6" r="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <line x1="16" y1="6" x2="14" y2="6" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    <span class="font-typewriter text-paper text-lg md:text-xl tracking-wide">老时光</span>
+                </div>
+                
+                <!-- 桌面端导航 -->
+                <nav class="hidden md:flex space-x-6">
+                    <a href="#" class="font-typewriter text-paper hover:text-lightBrown transition-colors duration-200">首页</a>
+                    <a href="#memories" class="font-typewriter text-paper hover:text-lightBrown transition-colors duration-200">回忆</a>
+                    <a href="#items" class="font-typewriter text-paper hover:text-lightBrown transition-colors duration-200">物件</a>
+                    <a href="#contact" class="font-typewriter text-paper hover:text-lightBrown transition-colors duration-200">联系</a>
+                </nav>
+                
+                <!-- 移动端折叠菜单按钮 - 老式电话图标 -->
+                <button id="menu-toggle" class="md:hidden text-paper focus:outline-none">
+                    <svg class="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+                        <rect x="4" y="3" width="16" height="4" rx="1" fill="none" stroke="currentColor" stroke-width="2"/>
+                        <rect x="4" y="17" width="16" height="4" rx="1" fill="none" stroke="currentColor" stroke-width="2"/>
+                        <line x1="8" y1="7" x2="8" y2="17" stroke="currentColor" stroke-width="2"/>
+                        <line x1="16" y1="7" x2="16" y2="13" stroke="currentColor" stroke-width="2"/>
+                        <circle cx="16" cy="17" r="2" fill="none" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- 移动端导航菜单 -->
+            <div id="mobile-menu" class="md:hidden hidden bg-retroRed/95 newspaper-texture absolute w-full left-0 top-full shadow-lg">
+                <div class="container mx-auto px-4 py-3 flex flex-col space-y-3">
+                    <a href="#" class="font-typewriter text-paper hover:text-lightBrown py-2 transition-colors duration-200">首页</a>
+                    <a href="#memories" class="font-typewriter text-paper hover:text-lightBrown py-2 transition-colors duration-200">回忆</a>
+                    <a href="#items" class="font-typewriter text-paper hover:text-lightBrown py-2 transition-colors duration-200">物件</a>
+                    <a href="#contact" class="font-typewriter text-paper hover:text-lightBrown py-2 transition-colors duration-200">联系</a>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Hero海报区 -->
+        <section class="relative h-[60vh] md:h-[60vh] mb-12 vintage-border bg-paper newspaper-texture flex flex-col justify-center items-center p-6 tape tape-top">
+            <h1 class="font-typewriter text-[2.2rem] md:text-[2.8rem] font-bold text-retroRed text-center transform -rotate-1 text-shadow mb-4 typewriter">
+                时光里的老故事
+            </h1>
+            <p class="font-handwritten text-lightBrown text-xl md:text-2xl mb-8 transform rotate-1">
+                1980-2000 那些年的回忆
+            </p>
+            <button class="bg-brown text-paper font-typewriter text-sm uppercase tracking-wider px-6 py-3 rounded-sm shadow-md hover:bg-brown/90 active:scale-98 transition-all duration-200 transform hover:shadow-lg">
+                走进回忆
+            </button>
+        </section>
+        
+        <!-- 复古分隔线 -->
+        <div class="dashed-divider h-2 my-10"></div>
+        
+        <!-- "往事回忆"内容区 -->
+        <section id="memories" class="mb-16">
+            <h2 class="font-typewriter text-[1.6rem] font-semibold text-center mb-10 relative inline-block mx-auto">
+                <span class="absolute left-[-40px] top-1/2 transform -translate-y-1/2 w-[30px] h-[1px] bg-brown"></span>
+                往事回忆
+                <span class="absolute right-[-40px] top-1/2 transform -translate-y-1/2 w-[30px] h-[1px] bg-brown"></span>
+            </h2>
+            
+            <!-- 回忆小节1 -->
+            <div class="mb-12 slide-in relative">
+                <!-- 日期标签 -->
+                <div class="font-handwritten text-lightBrown text-lg absolute -top-6 -left-2 transform rotate-[-10deg]">
+                    1995.07.12
+                </div>
+                
+                <div class="relative pl-4">
+                    <div class="flex flex-col md:flex-row items-start gap-6">
+                        <div class="md:w-2/3">
+                            <h3 class="font-typewriter text-xl text-retroRed mb-4">那年夏天</h3>
+                            <p class="text-brown leading-[1.7] first-letter:ml-8">
+                                那年的夏天似乎特别长，阳光透过老槐树的叶子，在地上洒下斑驳的光影。我们一群孩子拿着搪瓷杯，追着卖冰棍的自行车跑，"老冰棍，三分钱一根"的叫卖声回荡在整个胡同里。
+                            </p>
+                            <p class="text-brown leading-[1.7] first-letter:ml-8 mt-4">
+                                傍晚时分，大人们搬出竹椅坐在院子里乘凉，摇着蒲扇，说着家常。银河在夜空中格外清晰，我们躺在竹床上数着星星，听爷爷讲过去的故事。
+                            </p>
+                        </div>
+                        <div class="md:w-1/3 flex justify-center">
+                            <!-- 老自行车简笔画 -->
+                            <svg class="w-32 h-32 text-brown/70" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="20" cy="80" r="10"/>
+                                <circle cx="70" cy="80" r="10"/>
+                                <line x1="25" y1="75" x2="65" y2="75"/>
+                                <line x1="45" y1="75" x2="45" y2="50"/>
+                                <line x1="30" y1="50" x2="60" y2="50"/>
+                                <line x1="45" y1="50" x2="45" y2="30"/>
+                                <line x1="35" y1="30" x2="55" y2="30"/>
+                                <line x1="20" y1="40" x2="30" y2="50"/>
+                                <line x1="70" y1="70" x2="60" y2="50"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 复古碎花分隔 -->
+            <div class="floral-divider my-8"></div>
+            
+            <!-- 回忆小节2 -->
+            <div class="slide-in-right relative" style="transition-delay: 0.2s">
+                <!-- 日期标签 -->
+                <div class="font-handwritten text-lightBrown text-lg absolute -top-6 -left-2 transform rotate-[-10deg]">
+                    1988.03.20
+                </div>
+                
+                <div class="relative pl-4">
+                    <div class="flex flex-col md:flex-row-reverse items-start gap-6">
+                        <div class="md:w-2/3">
+                            <h3 class="font-typewriter text-xl text-retroRed mb-4">老街道</h3>
+                            <p class="text-brown leading-[1.7] first-letter:ml-8">
+                                那条老街道是我童年最熟悉的地方。街道两旁是青砖灰瓦的平房，门口挂着褪色的红灯笼。早晨，油条铺的香味会飘满整条街，早点摊前总是排着长队。
+                            </p>
+                            <p class="text-brown leading-[1.7] first-letter:ml-8 mt-4">
+                                街角的修鞋摊、杂货铺和新华书店是我们放学后的天堂。几分钱就能买到的糖果，能让我们开心一整天。那时候没有智能手机，却有着永远玩不腻的游戏和说不完的话。
+                            </p>
+                        </div>
+                        <div class="md:w-1/3 flex justify-center">
+                            <!-- 绿皮火车简笔画 -->
+                            <svg class="w-32 h-32 text-brown/70" viewBox="0 0 100 50" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="10" y="15" width="60" height="20" rx="2"/>
+                                <rect x="75" y="20" width="15" height="10" rx="1"/>
+                                <circle cx="25" cy="35" r="3"/>
+                                <circle cx="55" cy="35" r="3"/>
+                                <circle cx="85" cy="35" r="3"/>
+                                <line x1="5" y1="25" x2="10" y2="25"/>
+                                <line x1="15" y1="20" x2="15" y2="30"/>
+                                <line x1="40" y1="15" x2="40" y2="10"/>
+                                <line x1="45" y1="10" x2="55" y2="10"/>
+                                <line x1="60" y1="10" x2="60" y2="15"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 老式胶带分隔 -->
+        <div class="tape tape-top h-8 my-12"></div>
+        
+        <!-- "老物件展示"区 -->
+        <section id="items" class="mb-16">
+            <h2 class="font-typewriter text-[1.6rem] font-semibold text-center mb-10 relative inline-block mx-auto">
+                <span class="absolute left-[-40px] top-1/2 transform -translate-y-1/2 w-[30px] h-[1px] bg-brown"></span>
+                老物件展示
+                <span class="absolute right-[-40px] top-1/2 transform -translate-y-1/2 w-[30px] h-[1px] bg-brown"></span>
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- 物件1 -->
+                <div class="vintage-photo-frame p-3 bg-paper slide-in" style="transition-delay: 0.1s">
+                    <div class="bg-white p-2">
+                        <img src="https://picsum.photos/id/25/500/300" alt="老式收音机" class="w-full h-48 object-cover vintage-filter">
+                        <h3 class="font-typewriter text-center mt-3 text-brown">老式收音机</h3>
+                        <p class="font-handwritten text-lightBrown text-sm text-center mt-1">1988年的收音机，还能发出滋滋声</p>
+                    </div>
+                </div>
+                
+                <!-- 物件2 -->
+                <div class="vintage-photo-frame p-3 bg-paper slide-in" style="transition-delay: 0.3s">
+                    <div class="bg-white p-2">
+                        <img src="https://picsum.photos/id/96/500/300" alt="搪瓷杯" class="w-full h-48 object-cover vintage-filter">
+                        <h3 class="font-typewriter text-center mt-3 text-brown">搪瓷杯</h3>
+                        <p class="font-handwritten text-lightBrown text-sm text-center mt-1">1992年的"为人民服务"搪瓷杯</p>
+                    </div>
+                </div>
+                
+                <!-- 物件3 -->
+                <div class="vintage-photo-frame p-3 bg-paper slide-in-right" style="transition-delay: 0.2s">
+                    <div class="bg-white p-2">
+                        <img src="https://picsum.photos/id/116/500/300" alt="老相机" class="w-full h-48 object-cover vintage-filter">
+                        <h3 class="font-typewriter text-center mt-3 text-brown">胶片相机</h3>
+                        <p class="font-handwritten text-lightBrown text-sm text-center mt-1">1985年的胶片相机，记录了无数瞬间</p>
+                    </div>
+                </div>
+                
+                <!-- 物件4 -->
+                <div class="vintage-photo-frame p-3 bg-paper slide-in-right" style="transition-delay: 0.4s">
+                    <div class="bg-white p-2">
+                        <img src="https://picsum.photos/id/160/500/300" alt="老座钟" class="w-full h-48 object-cover vintage-filter">
+                        <h3 class="font-typewriter text-center mt-3 text-brown">座钟</h3>
+                        <p class="font-handwritten text-lightBrown text-sm text-center mt-1">1979年的座钟，滴答声陪伴了整个童年</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 复古分隔线 -->
+        <div class="dashed-divider h-2 my-10"></div>
+        
+        <!-- 页脚 -->
+        <footer id="contact" class="bg-paper envelope-texture py-8 border-t-2 border-brown/30 relative">
+            <div class="flex flex-col md:flex-row justify-between items-start">
+                <!-- 老式联系方式 -->
+                <div class="font-handwritten text-brown mb-6 md:mb-0">
+                    <p class="mb-2">电话：012-3456789</p>
+                    <p class="mb-2">地址：老街19号</p>
+                    <p>邮编：100000</p>
+                </div>
+                
+                <!-- 版权信息 -->
+                <div class="font-typewriter text-brown text-center md:text-right w-full md:w-auto">
+                    <p>© 1980-2024 老时光收藏馆</p>
+                    <p class="text-sm text-lightBrown mt-1">时光易逝，记忆永存</p>
+                </div>
+            </div>
+            
+            <!-- 邮票图案装饰 -->
+            <div class="absolute bottom-4 right-4 w-8 h-8 border-2 border-brown/60 flex items-center justify-center">
+                <svg class="w-5 h-5 text-brown/40" viewBox="0 0 20 20">
+                    <circle cx="10" cy="10" r="4" fill="none" stroke="currentColor" stroke-width="1"/>
+                    <line x1="10" y1="2" x2="10" y2="5" stroke="currentColor" stroke-width="1"/>
+                    <line x1="10" y1="15" x2="10" y2="18" stroke="currentColor" stroke-width="1"/>
+                    <line x1="2" y1="10" x2="5" y2="10" stroke="currentColor" stroke-width="1"/>
+                    <line x1="15" y1="10" x2="18" y2="10" stroke="currentColor" stroke-width="1"/>
+                </svg>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- JavaScript -->
+    <script>
+        // 导航菜单切换
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        menuToggle.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // 导航栏滚动效果 - 模拟旧招牌日晒效果
+        const navbar = document.getElementById('navbar');
+        
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('bg-retroRed/90');
+                navbar.classList.remove('bg-retroRed');
+            } else {
+                navbar.classList.add('bg-retroRed');
+                navbar.classList.remove('bg-retroRed/90');
+            }
+        });
+        
+        // 滚动动画 - 模拟翻页看到新内容
+        const animateOnScroll = () => {
+            const elements = document.querySelectorAll('.slide-in, .slide-in-right');
+            
+            elements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 150;
+                
+                if (elementTop < window.innerHeight - elementVisible) {
+                    element.classList.add('visible');
+                }
+            });
+        };
+        
+        // 初始检查可见元素
+        window.addEventListener('load', animateOnScroll);
+        // 滚动时检查可见元素
+        window.addEventListener('scroll', animateOnScroll);
+        
+        // 图片加载效果 - 模拟老照片显影过程
+        document.addEventListener('DOMContentLoaded', () => {
+            const images = document.querySelectorAll('img');
+            images.forEach(img => {
+                // 先显示模糊噪点状态
+                img.style.opacity = "0";
+                img.style.filter = "blur(5px) grayscale(100%) brightness(0.8)";
+                
+                // 图片加载完成后显示清晰状态
+                img.onload = () => {
+                    img.style.transition = "opacity 1s ease-in-out, filter 1s ease-in-out";
+                    img.style.opacity = "1";
+                    img.style.filter = "blur(0) grayscale(0%) brightness(1) saturate(0.9) sepia(0.05)";
+                };
+                
+                // 如果图片已经缓存
+                if (img.complete) {
+                    img.onload();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

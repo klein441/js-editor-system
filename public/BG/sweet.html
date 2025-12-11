@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sweetie - Sweet Moments</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Font Awesome图标 -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 配置Tailwind自定义主题 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        // 主色调
+                        primary: '#FFF0F3',
+                        secondary: '#E6E6FA',
+                        // 强调色
+                        accent1: '#FFB6C1', // 蜜桃粉
+                        accent2: '#FFFACD', // 淡鹅黄
+                        accent3: '#E0FFFF', // 薄荷绿
+                        // 中性色
+                        card: '#FFFFFF',
+                        divider: '#F8F0F2',
+                        text: '#8B5A2B'
+                    },
+                    fontFamily: {
+                        nunito: ['Nunito', 'Quicksand', 'system-ui', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        'global': '16px',
+                        'card': '16px',
+                        'img': '12px',
+                        'btn': '8px',
+                    },
+                    boxShadow: {
+                        'soft': '0 8px 16px rgba(255, 230, 234, 0.4)',
+                        'softer': '0 5px 10px rgba(255, 230, 234, 0.3)',
+                        'hover': '0 8px 24px rgba(255, 230, 234, 0.6)',
+                    }
+                },
+            }
+        }
+    </script>
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 5px rgba(255, 182, 193, 0.3);
+            }
+            .dot-pattern {
+                background-image: radial-gradient(#FFB6C1 5%, transparent 5%);
+                background-size: 20px 20px;
+                background-position: 0 0, 10px 10px;
+                background-color: transparent;
+            }
+            .float {
+                animation: float 6s ease-in-out infinite;
+            }
+            @keyframes float {
+                0% { transform: translateY(0px); }
+                50% { transform: translateY(-15px); }
+                100% { transform: translateY(0px); }
+            }
+            .fade-in {
+                animation: fadeIn 0.8s ease-out forwards;
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            @keyframes fadeIn {
+                to { opacity: 1; transform: translateY(0); }
+            }
+        }
+    </style>
+    <!-- 导入字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body class="bg-primary font-nunito text-text antialiased">
+    <!-- 装饰元素 -->
+    <div class="fixed top-20 left-10 w-8 h-8 text-accent1/30 float opacity-70" style="animation-delay: 0.1s">
+        <i class="fa fa-heart"></i>
+    </div>
+    <div class="fixed top-40 right-16 w-6 h-6 text-accent2/30 float opacity-70" style="animation-delay: 0.3s">
+        <i class="fa fa-star"></i>
+    </div>
+    <div class="fixed bottom-40 left-20 w-10 h-10 text-accent3/30 float opacity-70" style="animation-delay: 0.5s">
+        <i class="fa fa-birthday-cake"></i>
+    </div>
+    <div class="fixed bottom-20 right-24 w-7 h-7 text-accent1/30 float opacity-70" style="animation-delay: 0.7s">
+        <i class="fa fa-cookie"></i>
+    </div>
+
+    <!-- 顶部导航栏 -->
+    <header id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/80 shadow-soft">
+        <div class="max-w-1200px mx-auto px-4 py-4 flex justify-between items-center">
+            <!-- Logo -->
+            <a href="#" class="flex items-center gap-2">
+                <span class="text-accent1 text-2xl"><i class="fa fa-birthday-cake"></i></span>
+                <span class="text-xl font-semibold text-accent1">Sweetie</span>
+            </a>
+            
+            <!-- 桌面端导航 -->
+            <nav class="hidden md:flex items-center gap-8">
+                <a href="#" class="text-secondary hover:text-accent1 transition-colors duration-300 font-medium underline decoration-1 underline-offset-4">Home</a>
+                <a href="#shop" class="text-secondary hover:text-accent1 transition-colors duration-300 font-medium underline decoration-1 underline-offset-4">Shop</a>
+                <a href="#story" class="text-secondary hover:text-accent1 transition-colors duration-300 font-medium underline decoration-1 underline-offset-4">About</a>
+                <a href="#contact" class="text-secondary hover:text-accent1 transition-colors duration-300 font-medium underline decoration-1 underline-offset-4">Contact</a>
+            </nav>
+            
+            <!-- 移动端汉堡按钮 -->
+            <button id="menu-toggle" class="md:hidden text-accent1 text-2xl focus:outline-none">
+                <i class="fa fa-heart"></i>
+            </button>
+        </div>
+        
+        <!-- 移动端菜单 -->
+        <div id="mobile-menu" class="md:hidden fixed inset-0 bg-white z-50 transform translate-x-full transition-transform duration-300 ease-in-out">
+            <div class="flex justify-end p-6">
+                <button id="menu-close" class="text-accent1 text-2xl focus:outline-none">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <nav class="flex flex-col items-center gap-8 mt-16 text-xl">
+                <a href="#" class="text-secondary hover:text-accent1 transition-colors duration-300 font-medium">Home</a>
+                <a href="#shop" class="text-secondary hover:text-accent1 transition-colors duration-300 font-medium">Shop</a>
+                <a href="#story" class="text-secondary hover:text-accent1 transition-colors duration-300 font-medium">About</a>
+                <a href="#contact" class="text-secondary hover:text-accent1 transition-colors duration-300 font-medium">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="pt-16">
+        <!-- Hero Banner 区 -->
+        <section class="min-h-[70vh] md:min-h-[90vh] flex items-center justify-center relative overflow-hidden rounded-b-global dot-pattern fade-in" style="animation-delay: 0.1s">
+            <div class="max-w-1200px mx-auto px-6 text-center z-10">
+                <h1 class="text-[3rem] md:text-[2.2rem] font-semibold leading-[1.2] text-shadow mb-6">
+                    Sweet moments, happy days
+                </h1>
+                <p class="text-secondary text-lg mb-8 max-w-2xl mx-auto">
+                    Handmade treats for your sweet tooth, crafted with love and the finest ingredients
+                </p>
+                <a href="#shop" class="inline-block bg-accent1 text-white px-8 py-3 rounded-btn font-medium hover:scale-105 transition-all duration-300 shadow-softer">
+                    Shop Now
+                </a>
+            </div>
+        </section>
+
+        <!-- 特色内容区 -->
+        <section class="max-w-1200px mx-auto px-6 py-16 mt-12 fade-in" style="animation-delay: 0.2s">
+            <!-- 波浪线分隔符 -->
+            <div class="w-full h-6 mb-12">
+                <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="w-full h-full text-divider">
+                    <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C0,0,0,0,0,0z"></path>
+                </svg>
+            </div>
+
+            <!-- 故事小节 -->
+            <div id="story" class="flex flex-col md:flex-row gap-10 items-center mb-20">
+                <div class="w-full md:w-1/2">
+                    <img src="https://picsum.photos/seed/sweet1/600/400" alt="Our story" class="rounded-img w-full h-auto shadow-softer">
+                </div>
+                <div class="w-full md:w-1/2">
+                    <h2 class="text-[1.8rem] font-medium leading-[1.3] mb-6">
+                        <span class="text-accent1 mr-2"><i class="fa fa-heart"></i></span>Our Story
+                    </h2>
+                    <p class="text-base leading-[1.6] mb-6">
+                        Founded in 2020, Sweetie started as a small home bakery with a passion for creating delicious treats that bring joy to people's lives. Every dessert is handmade with love and care.
+                    </p>
+                    <p class="text-base leading-[1.6]">
+                        We believe that <span class="text-accent1 font-medium">sweet moments</span> are meant to be shared, which is why we put so much love into every creation.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 波浪线分隔符 -->
+            <div class="w-full h-6 my-12 transform rotate-180">
+                <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="w-full h-full text-divider">
+                    <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C0,0,0,0,0,0z"></path>
+                </svg>
+            </div>
+
+            <!-- 热门推荐小节 -->
+            <div class="flex flex-col md:flex-row-reverse gap-10 items-center">
+                <div class="w-full md:w-1/2">
+                    <img src="https://picsum.photos/seed/sweet2/600/400" alt="Popular picks" class="rounded-img w-full h-auto shadow-softer">
+                </div>
+                <div class="w-full md:w-1/2">
+                    <h2 class="text-[1.8rem] font-medium leading-[1.3] mb-6">
+                        <span class="text-accent1 mr-2"><i class="fa fa-star"></i></span>Popular Picks
+                    </h2>
+                    <p class="text-base leading-[1.6] mb-6">
+                        Our best-selling treats that customers can't get enough of! From fluffy cupcakes to rich chocolate truffles, there's something for every sweet tooth.
+                    </p>
+                    <p class="text-base leading-[1.6]">
+                        Try our <span class="text-accent1 font-medium">signature vanilla cake</span> - it's made with real vanilla beans and topped with creamy buttercream.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 展示区 -->
+        <section id="shop" class="max-w-1200px mx-auto px-6 py-16 mt-12 fade-in" style="animation-delay: 0.3s">
+            <h2 class="text-[1.8rem] font-medium leading-[1.3] mb-10 text-center">
+                <span class="text-accent1 mr-2"><i class="fa fa-birthday-cake"></i></span>Our Sweets
+            </h2>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- 产品卡片1 -->
+                <div class="bg-card rounded-card p-6 shadow-softer hover:shadow-hover transition-all duration-300 hover:scale-105">
+                    <img src="https://picsum.photos/seed/treat1/400/300" alt="Strawberry Cupcake" class="rounded-img w-full h-56 object-cover mb-4">
+                    <h3 class="text-lg font-semibold text-accent1 mb-2">Strawberry Cupcake</h3>
+                    <p class="text-divider mb-4">Fresh strawberries with vanilla frosting</p>
+                    <p class="font-medium">$4.99</p>
+                </div>
+                
+                <!-- 产品卡片2 -->
+                <div class="bg-card rounded-card p-6 shadow-softer hover:shadow-hover transition-all duration-300 hover:scale-105">
+                    <img src="https://picsum.photos/seed/treat2/400/300" alt="Chocolate Truffles" class="rounded-img w-full h-56 object-cover mb-4">
+                    <h3 class="text-lg font-semibold text-accent1 mb-2">Chocolate Truffles</h3>
+                    <p class="text-divider mb-4">Dark chocolate with creamy filling</p>
+                    <p class="font-medium">$8.99</p>
+                </div>
+                
+                <!-- 产品卡片3 -->
+                <div class="bg-card rounded-card p-6 shadow-softer hover:shadow-hover transition-all duration-300 hover:scale-105">
+                    <img src="https://picsum.photos/seed/treat3/400/300" alt="Vanilla Cake Slice" class="rounded-img w-full h-56 object-cover mb-4">
+                    <h3 class="text-lg font-semibold text-accent1 mb-2">Vanilla Cake Slice</h3>
+                    <p class="text-divider mb-4">Signature vanilla with buttercream</p>
+                    <p class="font-medium">$6.99</p>
+                </div>
+                
+                <!-- 产品卡片4 -->
+                <div class="bg-card rounded-card p-6 shadow-softer hover:shadow-hover transition-all duration-300 hover:scale-105">
+                    <img src="https://picsum.photos/seed/treat4/400/300" alt="Raspberry Tart" class="rounded-img w-full h-56 object-cover mb-4">
+                    <h3 class="text-lg font-semibold text-accent1 mb-2">Raspberry Tart</h3>
+                    <p class="text-divider mb-4">Buttery crust with fresh raspberries</p>
+                    <p class="font-medium">$5.99</p>
+                </div>
+                
+                <!-- 产品卡片5 -->
+                <div class="bg-card rounded-card p-6 shadow-softer hover:shadow-hover transition-all duration-300 hover:scale-105">
+                    <img src="https://picsum.photos/seed/treat5/400/300" alt="Matcha Cookies" class="rounded-img w-full h-56 object-cover mb-4">
+                    <h3 class="text-lg font-semibold text-accent1 mb-2">Matcha Cookies</h3>
+                    <p class="text-divider mb-4">Green tea infused shortbread</p>
+                    <p class="font-medium">$3.99</p>
+                </div>
+                
+                <!-- 产品卡片6 -->
+                <div class="bg-card rounded-card p-6 shadow-softer hover:shadow-hover transition-all duration-300 hover:scale-105">
+                    <img src="https://picsum.photos/seed/treat6/400/300" alt="Lemon Bar" class="rounded-img w-full h-56 object-cover mb-4">
+                    <h3 class="text-lg font-semibold text-accent1 mb-2">Lemon Bar</h3>
+                    <p class="text-divider mb-4">Tangy lemon filling with crumb topping</p>
+                    <p class="font-medium">$4.50</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer id="contact" class="bg-secondary rounded-t-global mt-16 py-10 fade-in" style="animation-delay: 0.4s">
+        <div class="max-w-1200px mx-auto px-6 text-center">
+            <div class="mb-6">
+                <a href="#" class="inline-flex items-center gap-2 text-accent1 text-2xl mb-4">
+                    <span><i class="fa fa-birthday-cake"></i></span>
+                    <span class="font-semibold">Sweetie</span>
+                </a>
+                <p class="text-text/80">Bringing sweetness to your everyday moments</p>
+            </div>
+            
+            <div class="flex justify-center gap-4 mb-6">
+                <a href="#" class="w-10 h-10 rounded-full bg-accent1/80 text-white flex items-center justify-center hover:bg-accent1 transition-colors duration-300">
+                    <i class="fa fa-instagram"></i>
+                </a>
+                <a href="#" class="w-10 h-10 rounded-full bg-accent1/80 text-white flex items-center justify-center hover:bg-accent1 transition-colors duration-300">
+                    <i class="fa fa-weibo"></i>
+                </a>
+                <a href="#" class="w-10 h-10 rounded-full bg-accent1/80 text-white flex items-center justify-center hover:bg-accent1 transition-colors duration-300">
+                    <i class="fa fa-wechat"></i>
+                </a>
+            </div>
+            
+            <p class="text-text/70 text-sm mb-2">© 2024 Sweetie Shop. All rights reserved.</p>
+            <p class="text-accent1 text-sm">Made with <i class="fa fa-heart"></i></p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // 导航栏滚动效果
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('bg-white', 'shadow');
+                navbar.classList.remove('bg-white/80', 'shadow-soft');
+            } else {
+                navbar.classList.add('bg-white/80', 'shadow-soft');
+                navbar.classList.remove('bg-white', 'shadow');
+            }
+        });
+
+        // 移动端菜单交互
+        const menuToggle = document.getElementById('menu-toggle');
+        const menuClose = document.getElementById('menu-close');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileLinks = mobileMenu.querySelectorAll('a');
+
+        menuToggle.addEventListener('click', () => {
+            mobileMenu.classList.remove('translate-x-full');
+        });
+
+        function closeMenu() {
+            mobileMenu.classList.add('translate-x-full');
+        }
+
+        menuClose.addEventListener('click', closeMenu);
+        mobileLinks.forEach(link => link.addEventListener('click', closeMenu));
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

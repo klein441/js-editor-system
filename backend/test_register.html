@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>注册功能测试</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 500;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #eee;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: border-color 0.3s;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      display: none;
+    }
+    .result.success {
+      background: #f6ffed;
+      border: 1px solid #b7eb8f;
+      color: #52c41a;
+      display: block;
+    }
+    .result.error {
+      background: #fff5f5;
+      border: 1px solid #ffccc7;
+      color: #cf1322;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 注册功能测试</h1>
+    <p class="subtitle">测试后端注册 API</p>
+
+    <form id="registerForm">
+      <div class="form-group">
+        <label>用户类型</label>
+        <select id="role" required>
+          <option value="student">学生</option>
+          <option value="teacher">教师</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>用户名/学号 *</label>
+        <input type="text" id="username" required placeholder="例如: 2024001">
+      </div>
+
+      <div class="form-group">
+        <label>姓名 *</label>
+        <input type="text" id="name" required placeholder="真实姓名">
+      </div>
+
+      <div class="form-group">
+        <label>密码 *</label>
+        <input type="password" id="password" required placeholder="至少6位">
+      </div>
+
+      <div class="form-group">
+        <label>邮箱</label>
+        <input type="email" id="email" placeholder="选填">
+      </div>
+
+      <div class="form-group">
+        <label>手机号</label>
+        <input type="tel" id="phone" placeholder="选填">
+      </div>
+
+      <button type="submit" id="submitBtn">注册</button>
+    </form>
+
+    <div id="result" class="result"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('registerForm');
+    const resultDiv = document.getElementById('result');
+    const submitBtn = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const data = {
+        username: document.getElementById('username').value,
+        password: document.getElementById('password').value,
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value,
+        role: document.getElementById('role').value
+      };
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = '注册中...';
+      resultDiv.className = 'result';
+      resultDiv.style.display = 'none';
+
+      try {
+        const response = await fetch('http://localhost:5000/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          resultDiv.className = 'result success';
+          resultDiv.textContent = '✅ 注册成功！用户名: ' + result.username + ', 角色: ' + result.role;
+          form.reset();
+        } else {
+          resultDiv.className = 'result error';
+          resultDiv.textContent = '❌ ' + result.error;
+        }
+      } catch (error) {
+        resultDiv.className = 'result error';
+        resultDiv.textContent = '❌ 网络错误: ' + error.message + ' (请确保后端服务已启动)';
+      }
+
+      submitBtn.disabled = false;
+      submitBtn.textContent = '注册';
+    });
+  </script>
+</body>
+</html>

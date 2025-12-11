@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>测试文件查看器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+        }
+        button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        pre {
+            background: #1a1a1a;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+        .error {
+            color: #ef4444;
+        }
+        .success {
+            color: #10b981;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 文件查看器测试工具</h1>
+        
+        <div class="test-section">
+            <h3>步骤1: 获取课件列表</h3>
+            <button onclick="fetchCourseware()">获取课件列表</button>
+            <pre id="courseware-result">点击按钮获取课件列表...</pre>
+        </div>
+
+        <div class="test-section">
+            <h3>步骤2: 测试特定课件</h3>
+            <label>课件ID: <input type="number" id="courseware-id" value="6" style="padding: 5px; width: 100px;"></label>
+            <button onclick="testCourseware()">测试课件</button>
+            <pre id="test-result">输入课件ID并点击测试...</pre>
+        </div>
+
+        <div class="test-section">
+            <h3>步骤3: 测试预览API</h3>
+            <label>课件ID: <input type="number" id="preview-id" value="6" style="padding: 5px; width: 100px;"></label>
+            <button onclick="testPreview()">测试预览</button>
+            <pre id="preview-result">输入课件ID并点击测试...</pre>
+        </div>
+    </div>
+
+    <script>
+        async function fetchCourseware() {
+            const resultEl = document.getElementById('courseware-result');
+            resultEl.textContent = '正在获取...';
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/courseware');
+                const data = await response.json();
+                
+                resultEl.innerHTML = '<span class="success">✅ 成功获取 ' + data.length + ' 个课件</span>\n\n';
+                resultEl.innerHTML += JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultEl.innerHTML = '<span class="error">❌ 错误: ' + error.message + '</span>';
+            }
+        }
+
+        async function testCourseware() {
+            const id = document.getElementById('courseware-id').value;
+            const resultEl = document.getElementById('test-result');
+            resultEl.textContent = '正在测试...';
+            
+            try {
+                // 获取课件列表
+                const response = await fetch('http://localhost:5000/api/courseware');
+                const data = await response.json();
+                
+                // 查找指定ID的课件
+                const courseware = data.find(c => c.id == id);
+                
+                if (!courseware) {
+                    resultEl.innerHTML = '<span class="error">❌ 未找到课件ID: ' + id + '</span>';
+                    return;
+                }
+                
+                // 显示课件信息
+                resultEl.innerHTML = '<span class="success">✅ 找到课件</span>\n\n';
+                resultEl.innerHTML += '📊 课件信息:\n';
+                resultEl.innerHTML += '  ID: ' + courseware.id + '\n';
+                resultEl.innerHTML += '  标题: ' + courseware.title + '\n';
+                resultEl.innerHTML += '  文件类型: ' + courseware.fileType + '\n';
+                resultEl.innerHTML += '  文件路径: ' + courseware.filePath + '\n\n';
+                
+                // 判断文件类型
+                const type = courseware.fileType.toLowerCase();
+                resultEl.innerHTML += '🔍 类型判断:\n';
+                resultEl.innerHTML += '  原始类型: "' + courseware.fileType + '"\n';
+                resultEl.innerHTML += '  转小写后: "' + type + '"\n';
+                
+                if (type === 'ppt' || type === 'pptx') {
+                    resultEl.innerHTML += '  <span class="success">✅ 应该使用 PPTImageViewer</span>\n';
+                } else if (type === 'pdf') {
+                    resultEl.innerHTML += '  <span class="success">✅ 应该使用 PDF 预览</span>\n';
+                } else if (type === 'doc' || type === 'docx') {
+                    resultEl.innerHTML += '  <span class="success">✅ 应该使用 Word 预览</span>\n';
+                } else {
+                    resultEl.innerHTML += '  <span class="error">⚠️ 未知类型</span>\n';
+                }
+                
+                resultEl.innerHTML += '\n完整数据:\n' + JSON.stringify(courseware, null, 2);
+            } catch (error) {
+                resultEl.innerHTML = '<span class="error">❌ 错误: ' + error.message + '</span>';
+            }
+        }
+
+        async function testPreview() {
+            const id = document.getElementById('preview-id').value;
+            const resultEl = document.getElementById('preview-result');
+            resultEl.textContent = '正在测试预览API...';
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/courseware/' + id + '/preview');
+                
+                resultEl.innerHTML = '📡 响应状态: ' + response.status + ' ' + response.statusText + '\n\n';
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultEl.innerHTML += '<span class="success">✅ 预览API成功</span>\n\n';
+                    resultEl.innerHTML += JSON.stringify(data, null, 2);
+                } else {
+                    const errorData = await response.json();
+                    resultEl.innerHTML += '<span class="error">❌ 预览API失败</span>\n\n';
+                    resultEl.innerHTML += JSON.stringify(errorData, null, 2);
+                }
+            } catch (error) {
+                resultEl.innerHTML = '<span class="error">❌ 错误: ' + error.message + '</span>';
+            }
+        }
+    </script>
+</body>
+</html>
