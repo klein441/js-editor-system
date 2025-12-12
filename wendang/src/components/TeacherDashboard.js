@@ -1988,7 +1988,9 @@ const SubmissionReview = ({ submissions, students, assignments, onOpenEditor, on
   const [filter, setFilter] = useState('all'); // all, reviewed, unreviewed
 
   const handleScoreSubmit = async () => {
-    if (!scoreForm.score || scoreForm.score < 0 || scoreForm.score > 100) {
+    // 验证分数输入
+    const score = parseFloat(scoreForm.score);
+    if (isNaN(score) || score < 0 || score > 100) {
       alert('请输入有效的分数（0-100）');
       return;
     }
@@ -1998,20 +2000,23 @@ const SubmissionReview = ({ submissions, students, assignments, onOpenEditor, on
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          score: parseInt(scoreForm.score),
-          comment: scoreForm.comment
+          score: score,
+          comment: scoreForm.comment || ''
         })
       });
 
       if (response.ok) {
-        onScoreUpdate(scoringSubmission.id, parseInt(scoreForm.score), scoreForm.comment);
+        onScoreUpdate(scoringSubmission.id, score, scoreForm.comment || '');
         setScoringSubmission(null);
         setScoreForm({ score: '', comment: '' });
         alert('✅ 批改成功！');
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '批改失败');
       }
     } catch (error) {
       console.error('批改失败:', error);
-      alert('❌ 批改失败，请重试');
+      alert('❌ 批改失败：' + error.message);
     }
   };
 

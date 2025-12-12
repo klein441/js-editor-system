@@ -16,6 +16,10 @@ app.use(cors({ origin: 'http://localhost:3000' }));
 const anchorRoutes = require('./routes/anchors');
 app.use('/api', anchorRoutes);
 
+// 引入作业提交路由
+const submissionRoutes = require('./routes/submissions');
+app.use('/api/submissions', submissionRoutes);
+
 // 静态文件服务 - 用于下载课件
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -518,9 +522,15 @@ app.put('/api/submissions/:id/score', async (req, res) => {
   const { score, comment } = req.body;
   
   try {
+    // 验证分数值
+    const numericScore = parseFloat(score);
+    if (isNaN(numericScore) || numericScore < 0 || numericScore > 100) {
+      return res.status(400).json({ error: '分数必须是0-100之间的数字' });
+    }
+    
     await pool.query(
       'UPDATE homework_submit SET score = ?, comment = ?, reviewed_at = NOW() WHERE id = ?',
-      [score, comment, submissionId]
+      [numericScore, comment || '', submissionId]
     );
     
     res.json({ success: true });
