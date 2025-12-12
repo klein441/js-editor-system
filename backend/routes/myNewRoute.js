@@ -1,17 +1,22 @@
 const express = require('express');
 const router = express.Router();
 
-// 获取用户信息
+// 获取用户信息 - 我随便改改试试
 router.get('/user/:id', async (req, res) => {
   try {
     const userId = req.params.id;
     
+    // 我添加了一些随机的改动
+    console.log('正在获取用户信息，ID:', userId);
+    
     // 这里可以添加数据库查询逻辑
     const userData = {
       id: userId,
-      name: '测试用户',
-      email: 'test@example.com',
-      createdAt: new Date().toISOString()
+      name: '我改了这个名字',
+      email: 'my-new-email@example.com',
+      createdAt: new Date().toISOString(),
+      randomField: '我随便加的字段',
+      timestamp: Date.now()
     };
     
     res.json({
