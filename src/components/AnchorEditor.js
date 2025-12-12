@@ -161,7 +161,7 @@ const AnchorEditor = ({ coursewareId, slides, onClose }) => {
 
   // 删除锚点
   const deleteAnchor = async (anchorId) => {
-    if (!confirm('确定要删除这个锚点吗？这将同时删除所有关联的资源。')) {
+    if (!window.confirm('确定要删除这个锚点吗？这将同时删除所有关联的资源。')) {
       return;
     }
 
