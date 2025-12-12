@@ -4,7 +4,10 @@ import FullEditor from './FullEditor';
 import LoginPage from './components/LoginPage';
 import TeacherDashboard from './components/TeacherDashboard';
 import StudentDashboard from './components/StudentDashboard';
+import NewStudentDashboard from './components/NewStudentDashboard';
+import SimpleStudentDashboard from './components/SimpleStudentDashboard';
 import TestAnchorDemo from './components/TestAnchorDemo';
+import TestPage from './components/TestPage';
 
 // 全局样式
 const globalStyles = `
@@ -183,7 +186,7 @@ function App() {
           >
             退出测试
           </button>
-          <TestAnchorDemo />
+          <TestPage />
         </div>
       );
     }
@@ -245,7 +248,7 @@ function App() {
       
       if (user.role === 'student') {
         return (
-          <StudentDashboard
+          <NewStudentDashboard
             key="student-dashboard"
             user={user}
             data={data}
