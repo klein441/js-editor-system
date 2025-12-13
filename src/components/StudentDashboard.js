@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Code, LogOut, Calendar, CheckCircle, Edit2, TrendingUp, Clock, Award, BookOpen, MessageCircle, FileText, BarChart3, Target, AlertCircle, Eye, Download, Settings, Bell, RefreshCw, Upload, FileCode } from 'lucide-react';
+import AIAssistant from './AIAssistant';
+import { useLanguage } from '../i18n/LanguageContext';
+import { interpolate } from '../i18n/translations';
+import LanguageSwitch from '../i18n/LanguageSwitch';
 
 const StudentDashboard = ({ user, data, onOpenEditor, onLogout }) => {
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('all'); // all, pending, completed
   const [selectedAssignment, setSelectedAssignment] = useState(null); // 选中的作业详情
   const [showCourseware, setShowCourseware] = useState(false); // 课件查看器
@@ -360,7 +365,7 @@ function addSkill(skillName) {
   // 提交答疑留言
   const handleSubmitQA = async () => {
     if (!qaMessage.trim()) {
-      alert('请输入您的问题');
+      alert(t('questionContent'));
       return;
     }
     
@@ -387,7 +392,7 @@ function addSkill(skillName) {
         console.log('提交成功:', newQuestion);
         setQaMessages([newQuestion, ...qaMessages]);
         setQaMessage('');
-        alert('✅ 问题已提交！教师会尽快回复。');
+        alert(t('submitSuccess'));
       } else {
         const errorData = await response.json();
         console.error('提交失败:', errorData);
@@ -454,10 +459,13 @@ function addSkill(skillName) {
           }}>
             <Code size={20} color="#fff" />
           </div>
-          <span style={{ fontWeight: '600', fontSize: '18px', color: '#1a1a2e' }}>编程教学平台</span>
+          <span style={{ fontWeight: '600', fontSize: '18px', color: '#1a1a2e' }}>{t('codingPlatform')}</span>
         </div>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {/* 语言切换按钮 */}
+          <LanguageSwitch />
+          
           {/* 通知图标 */}
           <div style={{ position: 'relative' }}>
             <button
@@ -509,7 +517,7 @@ function addSkill(skillName) {
               padding: '10px 16px', background: '#f5f5f5', border: 'none',
               borderRadius: '10px', color: '#666', cursor: 'pointer'
             }}>
-            <LogOut size={16} /> 退出
+            <LogOut size={16} /> {t('logout')}
           </button>
         </div>
       </header>
@@ -538,7 +546,7 @@ function addSkill(skillName) {
             alignItems: 'center'
           }}>
             <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '600' }}>
-              通知 {unreadCount > 0 && `(${unreadCount})`}
+              {t('notifications')} {unreadCount > 0 && `(${unreadCount})`}
             </h3>
             {unreadCount > 0 && (
               <button
@@ -553,7 +561,7 @@ function addSkill(skillName) {
                   color: '#667eea',
                   fontWeight: '500'
                 }}>
-                全部已读
+                {t('markAllRead')}
               </button>
             )}
           </div>
@@ -598,7 +606,7 @@ function addSkill(skillName) {
             ) : (
               <div style={{ padding: '60px 20px', textAlign: 'center', color: '#9ca3af' }}>
                 <Bell size={48} color="#d1d5db" style={{ marginBottom: '16px' }} />
-                <div style={{ fontSize: '14px' }}>暂无通知</div>
+                <div style={{ fontSize: '14px' }}>{t('noNotifications')}</div>
               </div>
             )}
           </div>
@@ -661,21 +669,21 @@ function addSkill(skillName) {
             borderRadius: '20px', padding: '40px', color: '#fff'
           }}>
             <h1 style={{ fontSize: '28px', fontWeight: '600', marginBottom: '8px' }}>
-              欢迎回来，{user.name}！
+              {t('welcomeBack')}，{user.name}！
             </h1>
-            <p style={{ opacity: 0.9, marginBottom: '24px' }}>继续你的编程学习之旅吧</p>
+            <p style={{ opacity: 0.9, marginBottom: '24px' }}>{t('continueYourJourney')}</p>
             <div style={{ display: 'flex', gap: '32px' }}>
               <div>
                 <div style={{ fontSize: '36px', fontWeight: '700' }}>{completedCount}</div>
-                <div style={{ opacity: 0.8 }}>已完成作业</div>
+                <div style={{ opacity: 0.8 }}>{t('completedAssignments')}</div>
               </div>
               <div>
                 <div style={{ fontSize: '36px', fontWeight: '700' }}>{pendingCount}</div>
-                <div style={{ opacity: 0.8 }}>待完成作业</div>
+                <div style={{ opacity: 0.8 }}>{t('pendingAssignments')}</div>
               </div>
               <div>
                 <div style={{ fontSize: '36px', fontWeight: '700' }}>{learningStats.averageScore}</div>
-                <div style={{ opacity: 0.8 }}>平均分</div>
+                <div style={{ opacity: 0.8 }}>{t('averageScoreLabel')}</div>
               </div>
             </div>
           </div>
@@ -688,7 +696,7 @@ function addSkill(skillName) {
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
               <AlertCircle size={20} color="#ff4d4f" />
               <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#1a1a2e', margin: 0 }}>
-                即将截止
+                {t('dueSoon')}
               </h3>
             </div>
             {urgentAssignments.length > 0 ? (
@@ -704,7 +712,7 @@ function addSkill(skillName) {
                         {assign.title}
                       </div>
                       <div style={{ fontSize: '12px', color: '#fa8c16' }}>
-                        ⏰ 还有 {daysLeft} 天截止
+                        ⏰ {interpolate(t('daysUntilDeadline'), { days: daysLeft })}
                       </div>
                     </div>
                   );
@@ -713,7 +721,7 @@ function addSkill(skillName) {
             ) : (
               <div style={{ textAlign: 'center', padding: '20px', color: '#999' }}>
                 <CheckCircle size={32} color="#52c41a" style={{ marginBottom: '8px' }} />
-                <div style={{ fontSize: '14px' }}>暂无紧急作业</div>
+                <div style={{ fontSize: '14px' }}>{t('noUrgentAssignments')}</div>
               </div>
             )}
           </div>
@@ -750,7 +758,7 @@ function addSkill(skillName) {
                 <div style={{ fontSize: '24px', fontWeight: '700', color: '#1a1a2e' }}>
                   {learningStats.masteredTopics}/{learningStats.totalTopics}
                 </div>
-                <div style={{ fontSize: '12px', color: '#888' }}>知识点掌握</div>
+                <div style={{ fontSize: '12px', color: '#888' }}>{t('knowledgeMastery')}</div>
               </div>
             </div>
             <div style={{ width: '100%', height: '6px', background: '#f0f0f0', borderRadius: '3px', overflow: 'hidden' }}>
@@ -762,7 +770,7 @@ function addSkill(skillName) {
               }} />
             </div>
             <div style={{ marginTop: '12px', fontSize: '12px', color: '#667eea', textAlign: 'center' }}>
-              点击查看详情 →
+              {t('viewDetails')} →
             </div>
           </div>
 
@@ -795,14 +803,14 @@ function addSkill(skillName) {
                 <div style={{ fontSize: '24px', fontWeight: '700', color: '#1a1a2e' }}>
                   {learningStats.weeklyHours}h
                 </div>
-                <div style={{ fontSize: '12px', color: '#888' }}>本周学习</div>
+                <div style={{ fontSize: '12px', color: '#888' }}>{t('weeklyStudyTime')}</div>
               </div>
             </div>
             <div style={{ fontSize: '12px', color: '#52c41a' }}>
-              📈 比上周多 1.5 小时
+              📈 {interpolate(t('increaseByHours'), { hours: '1.5' })}
             </div>
             <div style={{ marginTop: '8px', fontSize: '12px', color: '#667eea', textAlign: 'center' }}>
-              点击查看详情 →
+              {t('viewDetails')} →
             </div>
           </div>
 
@@ -835,7 +843,7 @@ function addSkill(skillName) {
                 <div style={{ fontSize: '24px', fontWeight: '700', color: '#1a1a2e' }}>
                   {learningStats.averageScore}
                 </div>
-                <div style={{ fontSize: '12px', color: '#888' }}>平均得分</div>
+                <div style={{ fontSize: '12px', color: '#888' }}>{t('averageScore')}</div>
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: '4px', height: '30px' }}>
@@ -850,7 +858,7 @@ function addSkill(skillName) {
               ))}
             </div>
             <div style={{ marginTop: '8px', fontSize: '12px', color: '#667eea', textAlign: 'center' }}>
-              点击查看详情 →
+              {t('clickToViewDetails')} →
             </div>
           </div>
 
@@ -883,14 +891,14 @@ function addSkill(skillName) {
                 <div style={{ fontSize: '24px', fontWeight: '700', color: '#1a1a2e' }}>
                   5
                 </div>
-                <div style={{ fontSize: '12px', color: '#888' }}>获得徽章</div>
+                <div style={{ fontSize: '12px', color: '#888' }}>{t('earnedBadges')}</div>
               </div>
             </div>
             <div style={{ fontSize: '12px', color: '#666' }}>
-              🏆 代码新星 · 🎯 准时达人
+              🏆 {t('codingRisingStar')} · 🎯 {t('punctualPerson')}
             </div>
             <div style={{ marginTop: '8px', fontSize: '12px', color: '#667eea', textAlign: 'center' }}>
-              点击查看详情 →
+              {t('viewDetails')} →
             </div>
           </div>
         </div>
@@ -914,8 +922,8 @@ function addSkill(skillName) {
             }}>
             <BookOpen size={24} color="#667eea" />
             <div style={{ textAlign: 'left' }}>
-              <div style={{ fontWeight: '600', color: '#1a1a2e', marginBottom: '4px' }}>学习资源库</div>
-              <div style={{ fontSize: '12px', color: '#888' }}>课件、示例代码、视频教程</div>
+              <div style={{ fontWeight: '600', color: '#1a1a2e', marginBottom: '4px' }}>{t('resourceLibrary')}</div>
+              <div style={{ fontSize: '12px', color: '#888' }}>{t('courseware')}</div>
             </div>
           </button>
 
@@ -936,8 +944,8 @@ function addSkill(skillName) {
             }}>
             <MessageCircle size={24} color="#52c41a" />
             <div style={{ textAlign: 'left' }}>
-              <div style={{ fontWeight: '600', color: '#1a1a2e', marginBottom: '4px' }}>在线答疑</div>
-              <div style={{ fontSize: '12px', color: '#888' }}>联系教师获取帮助</div>
+              <div style={{ fontWeight: '600', color: '#1a1a2e', marginBottom: '4px' }}>{t('onlineQA')}</div>
+              <div style={{ fontSize: '12px', color: '#888' }}>{t('contactTeacherForHelp')}</div>
             </div>
           </button>
 
@@ -958,8 +966,8 @@ function addSkill(skillName) {
             }}>
             <BarChart3 size={24} color="#fa8c16" />
             <div style={{ textAlign: 'left' }}>
-              <div style={{ fontWeight: '600', color: '#1a1a2e', marginBottom: '4px' }}>学习报告</div>
-              <div style={{ fontSize: '12px', color: '#888' }}>查看详细学习分析</div>
+              <div style={{ fontWeight: '600', color: '#1a1a2e', marginBottom: '4px' }}>{t('learningReport')}</div>
+              <div style={{ fontSize: '12px', color: '#888' }}>{t('viewDetailedAnalysis')}</div>
             </div>
           </button>
         </div>
@@ -967,15 +975,15 @@ function addSkill(skillName) {
         {/* 作业列表 */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#1a1a2e', margin: 0 }}>
-            我的作业
+            {t('myAssignments')}
           </h2>
           
           {/* 筛选标签 */}
           <div style={{ display: 'flex', gap: '8px' }}>
             {[
-              { key: 'all', label: '全部', count: assignments.length },
-              { key: 'pending', label: '待完成', count: pendingCount },
-              { key: 'completed', label: '已完成', count: completedCount }
+              { key: 'all', label: t('all'), count: assignments.length },
+              { key: 'pending', label: t('pending'), count: pendingCount },
+              { key: 'completed', label: t('completed'), count: completedCount }
             ].map(tab => (
               <button
                 key={tab.key}
@@ -1019,8 +1027,8 @@ function addSkill(skillName) {
             }
             
             // 使用真实数据
-            const difficulty = ['基础', '进阶', '挑战'][Math.floor(Math.random() * 3)];
-            const difficultyColor = { '基础': '#52c41a', '进阶': '#1890ff', '挑战': '#f5222d' };
+            const difficulty = [t('basic'), t('intermediate'), t('challenge')][Math.floor(Math.random() * 3)];
+            const difficultyColor = { [t('basic')]: '#52c41a', [t('intermediate')]: '#1890ff', [t('challenge')]: '#f5222d' };
             const score = submission?.score || null;
             const feedback = submission?.comment || null;
 
@@ -1048,21 +1056,21 @@ function addSkill(skillName) {
                         color: '#389e0d', borderRadius: '20px', fontSize: '12px',
                         display: 'flex', alignItems: 'center', gap: '4px'
                       }}>
-                        <CheckCircle size={12} /> 已完成
+                        <CheckCircle size={12} /> {t('completed')}
                       </span>
                     ) : isOverdue ? (
                       <span style={{
                         padding: '4px 12px', background: '#fff1f0',
                         color: '#cf1322', borderRadius: '20px', fontSize: '12px'
                       }}>
-                        已截止
+                        {t('overdue')}
                       </span>
                     ) : (
                       <span style={{
                         padding: '4px 12px', background: '#e6f7ff',
                         color: '#1890ff', borderRadius: '20px', fontSize: '12px'
                       }}>
-                        进行中
+                        {t('inProgress')}
                       </span>
                     )}
                   </div>
@@ -1090,7 +1098,7 @@ function addSkill(skillName) {
                         alignItems: 'center',
                         gap: '4px'
                       }}>
-                        <FileText size={12} /> 参考资料
+                        <FileText size={12} /> {t('referencesMaterials')}
                       </span>
                     )}
                   </div>
@@ -1110,7 +1118,7 @@ function addSkill(skillName) {
                     }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                         <span style={{ fontSize: '14px', fontWeight: '600', color: '#52c41a' }}>
-                          得分：{score}/100
+                          {t('grade')}：{score}/100
                         </span>
                         <div style={{ display: 'flex', gap: '4px' }}>
                           <span style={{ fontSize: '12px', color: '#52c41a' }}>HTML: 28/30</span>
@@ -1165,9 +1173,9 @@ function addSkill(skillName) {
                         e.currentTarget.style.boxShadow = 'none';
                       }}>
                       {isCompleted ? (
-                        <><Edit2 size={16} /> 查看详情</>
+                        <><Edit2 size={16} /> {t('viewDetails')}</>
                       ) : (
-                        <><FileText size={16} /> 查看作业</>
+                        <><FileText size={16} /> {t('viewDetails')}</>
                       )}
                     </button>
                     
@@ -1296,12 +1304,12 @@ function addSkill(skillName) {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '20px', fontSize: '14px', opacity: 0.9 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <Calendar size={16} />
-                      <span>截止时间：{selectedAssignment.deadline}</span>
+                      <span>{t('deadline')}：{selectedAssignment.deadline}</span>
                     </div>
                     {!selectedAssignment.isCompleted && !selectedAssignment.isOverdue && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#ffd666' }}>
                         <Clock size={16} />
-                        <span>还有 {Math.ceil((new Date(selectedAssignment.deadline) - new Date()) / (1000 * 60 * 60 * 24))} 天</span>
+                        <span>{interpolate(t('daysLeft'), { days: Math.ceil((new Date(selectedAssignment.deadline) - new Date()) / (1000 * 60 * 60 * 24)) })}</span>
                       </div>
                     )}
                   </div>
@@ -1343,7 +1351,7 @@ function addSkill(skillName) {
                   gap: '8px'
                 }}>
                   <FileText size={20} color="#667eea" />
-                  作业内容
+                  {t('assignmentContent')}
                 </h3>
                 <div style={{
                   background: '#f9fafb',
@@ -1371,7 +1379,7 @@ function addSkill(skillName) {
                     gap: '8px'
                   }}>
                     <Award size={20} color="#52c41a" />
-                    批改结果
+                    {t('gradingResult')}
                   </h3>
                   <div style={{
                     background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
@@ -1410,7 +1418,7 @@ function addSkill(skillName) {
                       lineHeight: 1.6
                     }}>
                       <div style={{ fontWeight: '600', marginBottom: '8px', color: '#16a34a' }}>
-                        💬 教师评语
+                        💬 {t('feedback')}
                       </div>
                       {selectedAssignment.feedback}
                     </div>
@@ -1466,7 +1474,7 @@ function addSkill(skillName) {
                       📄 课件：HTML基础
                     </div>
                     <div style={{ fontSize: '12px', color: '#6b7280' }}>
-                      点击查看相关课件
+                      {t('clickToViewCourseware')}
                     </div>
                   </a>
 
@@ -1755,7 +1763,7 @@ function addSkill(skillName) {
                           border: '1px solid #e5e7eb'
                         }}>
                           <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '12px' }}>
-                            已提交 {Object.keys(selectedAssignment.submission.files).length} 个文件
+                            {interpolate(t('submittedFiles'), { count: Object.keys(selectedAssignment.submission.files).length })}
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                             {Object.entries(selectedAssignment.submission.files).map(([fileName, content]) => (
@@ -1837,7 +1845,7 @@ function addSkill(skillName) {
                       onMouseLeave={(e) => {
                         e.currentTarget.style.background = 'white';
                       }}>
-                      <RefreshCw size={16} /> 申请重做 (剩余 {3 - selectedAssignment.submission.redoCount} 次机会)
+                      <RefreshCw size={16} /> {t('applyForRedo')} ({interpolate(t('remainingChances'), { count: 3 - selectedAssignment.submission.redoCount })})
                     </button>
                   )}
 
@@ -1867,7 +1875,7 @@ function addSkill(skillName) {
                       color: '#389e0d',
                       textAlign: 'center'
                     }}>
-                      ✓ 教师已批准重做申请，您可以重新提交作业
+                      ✓ {t('teacherApprovedRedo')}
                     </div>
                   )}
                 </div>
@@ -1934,7 +1942,7 @@ function addSkill(skillName) {
                     e.currentTarget.style.transform = 'translateY(0)';
                     e.currentTarget.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
                   }}>
-                  <FileText size={18} /> 提交作业
+                  <FileText size={18} /> {t('submitAssignment')}
                 </button>
               )}
             </div>
@@ -1992,10 +2000,10 @@ function addSkill(skillName) {
                 }}>
                 <Code size={48} style={{ marginBottom: '16px' }} />
                 <div style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px' }}>
-                  代码编辑器
+                  {t('codeEditor')}
                 </div>
                 <div style={{ fontSize: '13px', opacity: 0.9 }}>
-                  在线编写HTML/CSS/JS代码
+                  {t('writeCodeOnline')}
                 </div>
               </div>
 
@@ -2024,10 +2032,10 @@ function addSkill(skillName) {
                 }}>
                 <FileText size={48} style={{ marginBottom: '16px' }} />
                 <div style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px' }}>
-                  文档提交
+                  {t('documentSubmit')}
                 </div>
                 <div style={{ fontSize: '13px', opacity: 0.9 }}>
-                  编写文字说明并上传文件
+                  {t('writeTextAndUpload')}
                 </div>
               </div>
             </div>
@@ -2424,7 +2432,7 @@ function addSkill(skillName) {
                       padding: '12px', borderLeft: '3px solid #52c41a'
                     }}>
                       <div style={{ fontSize: '13px', fontWeight: '500', color: '#52c41a', marginBottom: '4px' }}>
-                        教师回复：
+                        {t('teacherReply')}
                       </div>
                       <div style={{ color: '#374151', lineHeight: 1.6 }}>
                         {msg.answer}
@@ -2437,7 +2445,7 @@ function addSkill(skillName) {
                       display: 'flex', alignItems: 'center', gap: '6px'
                     }}>
                       <Clock size={14} />
-                      等待教师回复中...
+                      {t('waitingForTeacherReply')}
                     </div>
                   )}
                 </div>
@@ -3551,7 +3559,7 @@ const QAModal = ({ onClose, qaMessages, qaMessage, setQaMessage, handleSubmitQA,
                       marginTop: '12px'
                     }}>
                       <div style={{ fontSize: '13px', color: '#52c41a', fontWeight: '600', marginBottom: '8px' }}>
-                        ✓ 教师回复
+                        {t('teacherReplied')}
                       </div>
                       <div style={{ fontSize: '14px', color: '#374151', lineHeight: 1.6 }}>
                         {msg.answer}
@@ -3572,7 +3580,7 @@ const QAModal = ({ onClose, qaMessages, qaMessage, setQaMessage, handleSubmitQA,
                       color: '#fa8c16',
                       fontWeight: '500'
                     }}>
-                      ⏳ 等待教师回复...
+                      {t('waitingForTeacherReplyShort')}
                     </div>
                   )}
                 </div>
@@ -3684,7 +3692,7 @@ const LearningReportModal = ({ onClose, learningStats, mySubmissions, assignment
                 borderRadius: '16px',
                 color: 'white'
               }}>
-                <div style={{ fontSize: '14px', opacity: 0.9, marginBottom: '8px' }}>平均分数</div>
+                <div style={{ fontSize: '14px', opacity: 0.9, marginBottom: '8px' }}>{t('averageScoreLabel')}</div>
                 <div style={{ fontSize: '36px', fontWeight: '700' }}>{avgScore}</div>
               </div>
               <div style={{
@@ -3878,7 +3886,7 @@ const RedoRequestModal = ({ assignment, user, onClose, onSuccess }) => {
 
       if (response.ok) {
         const result = await response.json();
-        alert('✅ 重做申请已提交！教师审核后您将收到通知。');
+        alert(t('redoRequestSubmitted'));
         onSuccess();
       } else {
         const error = await response.json();
@@ -3924,7 +3932,7 @@ const RedoRequestModal = ({ assignment, user, onClose, onSuccess }) => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
             <RefreshCw size={24} />
             <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '600' }}>
-              申请重做作业
+              {t('applyForRedoAssignment')}
             </h3>
           </div>
           <p style={{ margin: 0, fontSize: '14px', opacity: 0.9 }}>
@@ -3946,10 +3954,10 @@ const RedoRequestModal = ({ assignment, user, onClose, onSuccess }) => {
           }}>
             <div style={{ fontWeight: '600', marginBottom: '8px' }}>📋 重做说明</div>
             <ul style={{ margin: 0, paddingLeft: '20px' }}>
-              <li>每个作业最多可申请重做 3 次</li>
-              <li>需要说明重做原因，教师审核后决定是否批准</li>
-              <li>批准后可重新提交作业，之前的分数将被清除</li>
-              <li>您当前还有 {3 - (assignment.submission?.redoCount || 0)} 次重做机会</li>
+              <li>{t('redoInstructionsList1')}</li>
+              <li>{t('redoInstructionsList2')}</li>
+              <li>{t('redoInstructionsList3')}</li>
+              <li>{interpolate(t('redoInstructionsList4'), { count: 3 - (assignment.submission?.redoCount || 0) })}</li>
             </ul>
           </div>
 
@@ -3961,7 +3969,7 @@ const RedoRequestModal = ({ assignment, user, onClose, onSuccess }) => {
               fontSize: '14px',
               color: '#1a1a2e'
             }}>
-              重做原因 <span style={{ color: '#ff4d4f' }}>*</span>
+              {t('redoReason')} <span style={{ color: '#ff4d4f' }}>*</span>
             </label>
             <textarea
               value={reason}
@@ -4091,8 +4099,8 @@ const DocumentSubmitModal = ({ assignment, user, onClose, onSubmit }) => {
         alert(`❌ 提交失败：${error.error}`);
       }
     } catch (error) {
-      console.error('提交作业失败:', error);
-      alert('❌ 提交失败，请检查网络连接');
+      console.error(t('submitAssignmentFailed'), error);
+      alert(t('submitFailedCheckNetwork'));
     }
 
     setUploading(false);
@@ -4134,7 +4142,7 @@ const DocumentSubmitModal = ({ assignment, user, onClose, onSubmit }) => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
             <Upload size={24} />
             <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '600' }}>
-              提交作业（文档方式）
+              {t('submitAssignmentDocument')}
             </h3>
           </div>
           <p style={{ margin: 0, fontSize: '14px', opacity: 0.9 }}>
@@ -4153,12 +4161,12 @@ const DocumentSubmitModal = ({ assignment, user, onClose, onSubmit }) => {
               fontSize: '14px',
               color: '#1a1a2e'
             }}>
-              作业内容
+              {t('assignmentContent')}
             </label>
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="请在此输入您的作业内容、心得体会或说明..."
+              placeholder={t('ensureContentComplete')}
               rows={8}
               style={{
                 width: '100%',
@@ -4208,10 +4216,10 @@ const DocumentSubmitModal = ({ assignment, user, onClose, onSubmit }) => {
             }}>
               <Upload size={32} color="#52c41a" style={{ marginBottom: '12px' }} />
               <div style={{ fontSize: '14px', color: '#1a1a2e', marginBottom: '4px', fontWeight: '500' }}>
-                点击上传文件
+                {t('uploadFiles')}
               </div>
               <div style={{ fontSize: '12px', color: '#9ca3af' }}>
-                支持 Word、PDF、图片等格式，单个文件最大 50MB
+                {t('supportedFormats')}
               </div>
               <input
                 type="file"
@@ -4283,9 +4291,9 @@ const DocumentSubmitModal = ({ assignment, user, onClose, onSubmit }) => {
           }}>
             <div style={{ fontWeight: '600', marginBottom: '8px' }}>💡 提交提示</div>
             <ul style={{ margin: 0, paddingLeft: '20px' }}>
-              <li>请确保作业内容完整，包含必要的说明和文件</li>
-              <li>提交后可以在"已完成"标签页查看提交记录</li>
-              <li>教师批改后会显示分数和评语</li>
+              <li>{t('submitInstructionsList1')}</li>
+              <li>{t('submitInstructionsList2')}</li>
+              <li>{t('submitInstructionsList3')}</li>
             </ul>
           </div>
         </div>
@@ -4328,7 +4336,7 @@ const DocumentSubmitModal = ({ assignment, user, onClose, onSubmit }) => {
               cursor: uploading ? 'not-allowed' : 'pointer',
               boxShadow: uploading ? 'none' : '0 4px 12px rgba(82, 196, 26, 0.3)'
             }}>
-            {uploading ? '提交中...' : '提交作业'}
+            {uploading ? t('submitting') : t('submitAssignment')}
           </button>
         </div>
       </div>

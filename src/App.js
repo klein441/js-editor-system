@@ -7,7 +7,7 @@ import StudentDashboard from './components/StudentDashboard';
 import NewStudentDashboard from './components/NewStudentDashboard';
 import SimpleStudentDashboard from './components/SimpleStudentDashboard';
 import TestAnchorDemo from './components/TestAnchorDemo';
-import TestPage from './components/TestPage';
+import { LanguageProvider } from './i18n/LanguageContext';
 
 // 全局样式
 const globalStyles = `
@@ -186,7 +186,6 @@ function App() {
           >
             退出测试
           </button>
-          <TestPage />
         </div>
       );
     }
@@ -270,10 +269,12 @@ function App() {
   };
 
   return (
-    <div style={{ minHeight: '100vh' }}>
-      <style>{globalStyles}</style>
-      {renderView()}
-    </div>
+    <LanguageProvider>
+      <div style={{ minHeight: '100vh' }}>
+        <style>{globalStyles}</style>
+        {renderView()}
+      </div>
+    </LanguageProvider>
   );
 }
 

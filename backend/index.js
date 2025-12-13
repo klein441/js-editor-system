@@ -1379,11 +1379,17 @@ app.put('/api/profile/:userId', async (req, res) => {
   }
 });
 
+// ========== AI 助手路由 ==========
+const aiRouter = require('./routes/ai');
+app.use('/api/ai', aiRouter);
+
 // health check
 app.get('/', (req, res) => res.json({ status: 'ok', message: 'JS Editor API Server' }));
 
+// 启动服务器
 app.listen(PORT, () => {
   console.log(`✅ API server running on http://localhost:${PORT}`);
   console.log(`📝 Database: ${process.env.DB_NAME || 'js_editor'}`);
   console.log(`📁 Upload directory: ${uploadDir}`);
+  console.log(`🤖 AI Assistant: 硅基流动 ${process.env.SILICONFLOW_API_KEY ? 'configured ✅' : 'not configured ❌'}`);
 });

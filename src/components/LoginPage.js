@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { User, Lock, LogIn, Code, Eye, EyeOff, AlertCircle, UserPlus, Mail, Phone } from 'lucide-react';
+import { useLanguage } from '../i18n/LanguageContext';
+import LanguageSwitch from '../i18n/LanguageSwitch';
 
 const LoginPage = ({ onLogin, students }) => {
+  const { t } = useLanguage();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -70,7 +73,7 @@ const LoginPage = ({ onLogin, students }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!username || !password) {
-      setError('请输入用户名和密码');
+      setError(t('enterUsernameAndPassword'));
       return;
     }
     
@@ -86,7 +89,7 @@ const LoginPage = ({ onLogin, students }) => {
       
       if (!response.ok) {
         const error = await response.json();
-        setError(error.error || '登录失败');
+        setError(error.error || t('loginFailed'));
         setIsLoading(false);
         return;
       }
@@ -94,8 +97,8 @@ const LoginPage = ({ onLogin, students }) => {
       const userData = await response.json();
       onLogin(userData);
     } catch (error) {
-      console.error('登录错误:', error);
-      setError('网络错误，请检查后端服务是否启动（http://localhost:5000）');
+      console.error(t('loginFailed') + ':', error);
+      setError(t('networkError'));
     }
     
     setIsLoading(false);
@@ -108,22 +111,22 @@ const LoginPage = ({ onLogin, students }) => {
     
     // 表单验证
     if (!registerData.username || !registerData.password || !registerData.name) {
-      setError('请填写必填项');
+      setError(t('requiredField'));
       return;
     }
     
     if (registerData.password !== registerData.confirmPassword) {
-      setError('两次输入的密码不一致');
+      setError(t('passwordMismatch'));
       return;
     }
     
     if (registerData.password.length < 6) {
-      setError('密码长度至少为6位');
+      setError(t('passwordTooShort'));
       return;
     }
     
     if (registerData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(registerData.email)) {
-      setError('邮箱格式不正确');
+      setError(t('invalidEmail'));
       return;
     }
     
@@ -145,12 +148,12 @@ const LoginPage = ({ onLogin, students }) => {
       
       if (!response.ok) {
         const error = await response.json();
-        setError(error.error || '注册失败');
+        setError(error.error || t('registerFailed'));
         setIsLoading(false);
         return;
       }
       
-      setSuccess('注册成功！即将跳转到登录...');
+      setSuccess(t('registerSuccess'));
       setTimeout(() => {
         setIsRegisterMode(false);
         setUsername(registerData.username);
@@ -161,8 +164,8 @@ const LoginPage = ({ onLogin, students }) => {
         setSuccess('');
       }, 1500);
     } catch (error) {
-      console.error('注册错误:', error);
-      setError('网络错误，请检查后端服务是否启动（http://localhost:5000）');
+      console.error(t('registerFailed') + ':', error);
+      setError(t('networkError'));
     }
     
     setIsLoading(false);
@@ -178,8 +181,19 @@ const LoginPage = ({ onLogin, students }) => {
     <div style={{
       minHeight: '100vh',
       display: 'flex',
-      background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)'
+      background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+      position: 'relative'
     }}>
+      {/* 语言切换按钮 */}
+      <div style={{
+        position: 'absolute',
+        top: '20px',
+        right: '20px',
+        zIndex: 1000
+      }}>
+        <LanguageSwitch />
+      </div>
+
       {/* 左侧装饰区域 */}
       <div style={{
         flex: 1,
@@ -353,7 +367,7 @@ const LoginPage = ({ onLogin, students }) => {
           }}>
             在线编写、运行代码<br />
             轻松完成编程作业<br />
-            <span style={{ fontSize: '16px', opacity: 0.8 }}>💻 实时编译 · 📊 可视化 · 🎯 智能评分</span>
+            <span style={{ fontSize: '16px', opacity: 0.8 }}>💻 {t('realtimeCompile')} · 📊 {t('visualization')} · 🎯 {t('intelligentGrading')}</span>
           </p>
         </div>
 
@@ -388,10 +402,10 @@ const LoginPage = ({ onLogin, students }) => {
       }}>
         <div style={{ maxWidth: '360px', margin: '0 auto', width: '100%' }}>
           <h2 style={{ fontSize: '28px', fontWeight: '600', color: '#1a1a2e', marginBottom: '8px' }}>
-            {isRegisterMode ? '创建账户' : '欢迎回来'}
+            {isRegisterMode ? t('createAccount') : t('welcomeBack')}
           </h2>
           <p style={{ color: '#666', marginBottom: '32px' }}>
-            {isRegisterMode ? '填写信息完成注册' : '请登录您的账户'}
+            {isRegisterMode ? t('fillInfoToRegister') : t('pleaseLogin')}
           </p>
 
           {/* 用户类型切换 */}
@@ -414,7 +428,7 @@ const LoginPage = ({ onLogin, students }) => {
                 transition: 'all 0.3s'
               }}
             >
-              👨‍🎓 学生登录
+              👨‍🎓 {t('studentLogin')}
             </button>
             <button
               onClick={() => setUserType('teacher')}
@@ -428,7 +442,7 @@ const LoginPage = ({ onLogin, students }) => {
                 transition: 'all 0.3s'
               }}
             >
-              👨‍🏫 教师登录
+              👨‍🏫 {t('teacherLogin')}
             </button>
           </div>
 
@@ -437,7 +451,7 @@ const LoginPage = ({ onLogin, students }) => {
             <form onSubmit={handleSubmit}>
               <div style={{ marginBottom: '20px' }}>
                 <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: '500' }}>
-                  {userType === 'student' ? '学号' : '用户名'}
+                  {userType === 'student' ? t('studentId') : t('username')}
                 </label>
                 <div style={{ position: 'relative' }}>
                   <User size={18} color="#999" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
@@ -445,7 +459,7 @@ const LoginPage = ({ onLogin, students }) => {
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder={userType === 'student' ? '请输入学号' : '请输入用户名'}
+                    placeholder={userType === 'student' ? t('enterStudentId') : t('enterUsername')}
                     style={{
                       width: '100%', padding: '14px 16px 14px 48px',
                       border: '2px solid #eee', borderRadius: '12px',
@@ -459,14 +473,14 @@ const LoginPage = ({ onLogin, students }) => {
               </div>
 
               <div style={{ marginBottom: '24px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: '500' }}>密码</label>
+                <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: '500' }}>{t('password')}</label>
                 <div style={{ position: 'relative' }}>
                   <Lock size={18} color="#999" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="请输入密码"
+                    placeholder={t('enterPassword')}
                     style={{
                       width: '100%', padding: '14px 48px 14px 48px',
                       border: '2px solid #eee', borderRadius: '12px',
@@ -515,21 +529,21 @@ const LoginPage = ({ onLogin, students }) => {
                   transition: 'opacity 0.3s'
                 }}>
                 {isLoading ? (
-                  <><div style={{ width: '20px', height: '20px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} /> 登录中...</>
+                  <><div style={{ width: '20px', height: '20px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} /> {t('loggingIn')}</>
                 ) : (
-                  <><LogIn size={18} /> 登 录</>
+                  <><LogIn size={18} /> {t('login')}</>
                 )}
               </button>
 
               <div style={{ marginTop: '24px', textAlign: 'center' }}>
-                <span style={{ color: '#666' }}>还没有账户？</span>
+                <span style={{ color: '#666' }}>{t('noAccount')}</span>
                 <button type="button" onClick={switchMode}
                   style={{
                     background: 'none', border: 'none', color: '#667eea',
                     fontWeight: '600', cursor: 'pointer', marginLeft: '8px',
                     textDecoration: 'underline'
                   }}>
-                  立即注册
+                  {t('registerNow')}
                 </button>
               </div>
             </form>
@@ -538,7 +552,7 @@ const LoginPage = ({ onLogin, students }) => {
             <form onSubmit={handleRegister}>
               <div style={{ marginBottom: '16px' }}>
                 <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: '500' }}>
-                  {userType === 'student' ? '学号' : '用户名'} <span style={{ color: '#ff4d4f' }}>*</span>
+                  {userType === 'student' ? t('studentId') : t('username')} <span style={{ color: '#ff4d4f' }}>*</span>
                 </label>
                 <div style={{ position: 'relative' }}>
                   <User size={18} color="#999" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
@@ -546,7 +560,7 @@ const LoginPage = ({ onLogin, students }) => {
                     type="text"
                     value={registerData.username}
                     onChange={(e) => setRegisterData({...registerData, username: e.target.value})}
-                    placeholder={userType === 'student' ? '请输入学号' : '请输入用户名'}
+                    placeholder={userType === 'student' ? t('enterStudentId') : t('enterUsername')}
                     style={{
                       width: '100%', padding: '12px 16px 12px 48px',
                       border: '2px solid #eee', borderRadius: '12px',
@@ -561,7 +575,7 @@ const LoginPage = ({ onLogin, students }) => {
 
               <div style={{ marginBottom: '16px' }}>
                 <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: '500' }}>
-                  姓名 <span style={{ color: '#ff4d4f' }}>*</span>
+                  {t('realName')} <span style={{ color: '#ff4d4f' }}>*</span>
                 </label>
                 <div style={{ position: 'relative' }}>
                   <User size={18} color="#999" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
@@ -569,7 +583,7 @@ const LoginPage = ({ onLogin, students }) => {
                     type="text"
                     value={registerData.name}
                     onChange={(e) => setRegisterData({...registerData, name: e.target.value})}
-                    placeholder="请输入真实姓名"
+                    placeholder={t('enterName')}
                     style={{
                       width: '100%', padding: '12px 16px 12px 48px',
                       border: '2px solid #eee', borderRadius: '12px',
@@ -584,7 +598,7 @@ const LoginPage = ({ onLogin, students }) => {
 
               <div style={{ marginBottom: '16px' }}>
                 <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: '500' }}>
-                  密码 <span style={{ color: '#ff4d4f' }}>*</span>
+                  {t('password')} <span style={{ color: '#ff4d4f' }}>*</span>
                 </label>
                 <div style={{ position: 'relative' }}>
                   <Lock size={18} color="#999" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
@@ -592,7 +606,7 @@ const LoginPage = ({ onLogin, students }) => {
                     type={showRegisterPassword ? 'text' : 'password'}
                     value={registerData.password}
                     onChange={(e) => setRegisterData({...registerData, password: e.target.value})}
-                    placeholder="至少6位密码"
+                    placeholder={t('atLeast6Chars')}
                     style={{
                       width: '100%', padding: '12px 48px 12px 48px',
                       border: '2px solid #eee', borderRadius: '12px',
@@ -611,7 +625,7 @@ const LoginPage = ({ onLogin, students }) => {
 
               <div style={{ marginBottom: '16px' }}>
                 <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: '500' }}>
-                  确认密码 <span style={{ color: '#ff4d4f' }}>*</span>
+                  {t('confirmPassword')} <span style={{ color: '#ff4d4f' }}>*</span>
                 </label>
                 <div style={{ position: 'relative' }}>
                   <Lock size={18} color="#999" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
@@ -619,7 +633,7 @@ const LoginPage = ({ onLogin, students }) => {
                     type={showConfirmPassword ? 'text' : 'password'}
                     value={registerData.confirmPassword}
                     onChange={(e) => setRegisterData({...registerData, confirmPassword: e.target.value})}
-                    placeholder="再次输入密码"
+                    placeholder={t('reEnterPasswordPlaceholder')}
                     style={{
                       width: '100%', padding: '12px 48px 12px 48px',
                       border: '2px solid #eee', borderRadius: '12px',
@@ -637,7 +651,7 @@ const LoginPage = ({ onLogin, students }) => {
               </div>
 
               <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: '500' }}>邮箱</label>
+                <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: '500' }}>{t('email')}</label>
                 <div style={{ position: 'relative' }}>
                   <Mail size={18} color="#999" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
                   <input
@@ -658,14 +672,14 @@ const LoginPage = ({ onLogin, students }) => {
               </div>
 
               <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: '500' }}>手机号</label>
+                <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: '500' }}>{t('phone')}</label>
                 <div style={{ position: 'relative' }}>
                   <Phone size={18} color="#999" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
                   <input
                     type="tel"
                     value={registerData.phone}
                     onChange={(e) => setRegisterData({...registerData, phone: e.target.value})}
-                    placeholder="选填：手机号码"
+                    placeholder={t('phoneOptional')}
                     style={{
                       width: '100%', padding: '12px 16px 12px 48px',
                       border: '2px solid #eee', borderRadius: '12px',
@@ -710,21 +724,21 @@ const LoginPage = ({ onLogin, students }) => {
                   transition: 'opacity 0.3s'
                 }}>
                 {isLoading ? (
-                  <><div style={{ width: '20px', height: '20px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} /> 注册中...</>
+                  <><div style={{ width: '20px', height: '20px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} /> {t('registering')}</>
                 ) : (
-                  <><UserPlus size={18} /> 注 册</>
+                  <><UserPlus size={18} /> {t('register')}</>
                 )}
               </button>
 
               <div style={{ marginTop: '20px', textAlign: 'center' }}>
-                <span style={{ color: '#666' }}>已有账户？</span>
+                <span style={{ color: '#666' }}>{t('alreadyHaveAccount')}</span>
                 <button type="button" onClick={switchMode}
                   style={{
                     background: 'none', border: 'none', color: '#667eea',
                     fontWeight: '600', cursor: 'pointer', marginLeft: '8px',
                     textDecoration: 'underline'
                   }}>
-                  立即登录
+                  {t('loginNow')}
                 </button>
               </div>
             </form>

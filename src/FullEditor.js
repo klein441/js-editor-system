@@ -401,7 +401,7 @@ p {
     <h2>股票价格走势 (数据来自 JSON 文件)</h2>
     <svg id="stockChart" width="600" height="400"></svg>
     
-    <p>提示：鼠标悬停在数据点上可以查看详细信息。</p>
+    <p>{t('hoverForDetails')}</p>
 
     <script>
         // 通用折线图初始化函数
@@ -733,8 +733,8 @@ const SubmitModal = ({ show, files, projectFiles, onClose, onSubmit }) => {
           display: 'flex', justifyContent: 'space-between', alignItems: 'center'
         }}>
           <div>
-            <h2 style={{ margin: 0, fontSize: '18px', color: '#fff' }}>📤 提交作业</h2>
-            <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#888' }}>选择要提交的文件</p>
+            <h2 style={{ margin: 0, fontSize: '18px', color: '#fff' }}>{t('submitAssignmentTitle')}</h2>
+            <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#888' }}>{t('selectFilesToSubmit')}</p>
           </div>
           <button onClick={onClose} style={{
             background: 'none', border: 'none', color: '#888',
@@ -762,8 +762,8 @@ const SubmitModal = ({ show, files, projectFiles, onClose, onSubmit }) => {
 
           {availableFiles.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px 20px', color: '#888' }}>
-              <p>暂无可提交的文件</p>
-              <p style={{ fontSize: '13px' }}>请先在编辑器中创建文件</p>
+              <p>{t('noFilesToSubmit')}</p>
+              <p style={{ fontSize: '13px' }}>{t('createFilesFirst')}</p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -1030,7 +1030,7 @@ function FullEditor({
       alert('至少保留一个项目');
       return;
     }
-    if (window.confirm('确定删除此项目吗?')) {
+    if (window.confirm(t('confirmDeleteProject'))) {
       setProjects(projects.filter(p => p.id !== id));
       if (currentProject === id) {
         setCurrentProject(projects[0].id);
@@ -1096,7 +1096,7 @@ console.log('${name} 页面加载完成');`);
   };
 
   const deleteFile = (filePath) => {
-    if (window.confirm('确定删除吗?')) {
+    if (window.confirm(t('confirmDeleteFile'))) {
       setProjects(projects.map(p => 
         p.id === currentProject 
           ? { ...p, files: p.files.filter(f => f.path !== filePath && !f.path.startsWith(filePath + '/')) }
@@ -1480,7 +1480,7 @@ console.log('📁 虚拟文件系统已加载，文件数量:', Object.keys(wind
 
   const refresh = () => {
     setOutput('');
-    alert('✅ 编辑器已刷新');
+    alert(t('editorRefreshed'));
   };
 
   const applyTemplate = (templateName) => {
@@ -1530,7 +1530,7 @@ console.log('📁 虚拟文件系统已加载，文件数量:', Object.keys(wind
     setShowVisualizationExamples(false);
     
     const fileNames = Object.keys(exampleData).join('\n- ');
-    alert(`✅ ${exampleName}示例已加载！\n\n包含文件：\n- ${fileNames}\n\n点击运行按钮查看效果！`);
+    alert(interpolate(t('exampleLoaded'), { name: exampleName, files: fileNames }));
   };
 
   const handleFileUpload = (e) => {
@@ -1728,7 +1728,7 @@ console.log('📁 虚拟文件系统已加载，文件数量:', Object.keys(wind
             <button onClick={addProject} style={{ marginLeft: '8px', padding: '6px 10px', background: '#0e639c', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>新建</button>
           </div>
           {projects.length > 1 && (
-            <button onClick={() => deleteProject(currentProject)} style={{ width: '100%', padding: '6px', background: '#c92a2a', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>删除当前项目</button>
+            <button onClick={() => deleteProject(currentProject)} style={{ width: '100%', padding: '6px', background: '#c92a2a', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>{t('deleteCurrentProject')}</button>
           )}
         </div>
 
@@ -1839,7 +1839,7 @@ console.log('📁 虚拟文件系统已加载，文件数量:', Object.keys(wind
               <Save size={16} /> 保存
             </button>
             <button onClick={downloadFile} disabled={!currentFile} className="action-btn" style={{ background: currentFile ? '#7c3aed' : '#555' }}>
-              <Download size={16} /> 下载
+              <Download size={16} /> {t('downloadFile')}
             </button>
             <button onClick={runCode} disabled={!currentFile} className="action-btn" style={{ background: currentFile ? '#16a34a' : '#555' }}>
               <Play size={16} /> 运行
@@ -1851,7 +1851,7 @@ console.log('📁 虚拟文件系统已加载，文件数量:', Object.keys(wind
             {mode === 'student_work' && onSubmit && (
               <button onClick={() => setShowSubmitModal(true)} className="action-btn"
                 style={{ background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)', boxShadow: '0 4px 15px rgba(22, 163, 74, 0.3)' }}>
-                <Send size={16} /> 提交作业
+                <Send size={16} /> {t('submitAssignment')}
               </button>
             )}
           </div>

@@ -5,8 +5,12 @@ import {
   Target, TrendingUp, AlertCircle, Eye, Download, Upload,
   Code, Edit2, RefreshCw, Play, Video, Anchor
 } from 'lucide-react';
+import { useLanguage } from '../i18n/LanguageContext';
+import LanguageSwitch from '../i18n/LanguageSwitch';
+import AIAssistant from './AIAssistant';
 
 const NewStudentDashboard = ({ user, data, onOpenEditor, onLogout }) => {
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -60,19 +64,19 @@ const NewStudentDashboard = ({ user, data, onOpenEditor, onLogout }) => {
 
   // 菜单项配置
   const menuItems = [
-    { id: 'dashboard', icon: <Home size={18}/>, label: '学习概览' },
-    { id: 'assignments', icon: <FileText size={18}/>, label: '我的作业' },
-    { id: 'courseware', icon: <BookOpen size={18}/>, label: '学习资源' },
-    { id: 'qa', icon: <MessageCircle size={18}/>, label: '在线答疑' },
-    { id: 'reports', icon: <BarChart3 size={18}/>, label: '学习报告' }
+    { id: 'dashboard', icon: <Home size={18}/>, label: t('learningProgress') },
+    { id: 'assignments', icon: <FileText size={18}/>, label: t('myAssignments') },
+    { id: 'courseware', icon: <BookOpen size={18}/>, label: t('resourceLibrary') },
+    { id: 'qa', icon: <MessageCircle size={18}/>, label: t('onlineQA') },
+    { id: 'reports', icon: <BarChart3 size={18}/>, label: t('learningReport') }
   ];
 
   const tabLabels = {
-    dashboard: '学习概览',
-    assignments: '我的作业', 
-    courseware: '学习资源',
-    qa: '在线答疑',
-    reports: '学习报告'
+    dashboard: t('learningProgress'),
+    assignments: t('myAssignments'), 
+    courseware: t('resourceLibrary'),
+    qa: t('onlineQA'),
+    reports: t('learningReport')
   };
 
   return (  
@@ -109,9 +113,9 @@ const NewStudentDashboard = ({ user, data, onOpenEditor, onLogout }) => {
           </div>
           <div>
             <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#1a1a2e', margin: 0 }}>
-              JS编辑器
+              {t('codingPlatform')}
             </h2>
-            <p style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>学生端</p>
+            <p style={{ fontSize: '12px', color: '#6b7280', margin: 0 }}>{t('studentDashboard')}</p>
           </div>
         </div>
 
@@ -217,15 +221,18 @@ const NewStudentDashboard = ({ user, data, onOpenEditor, onLogout }) => {
               {tabLabels[activeTab]}
             </h1>
             <p style={{ fontSize: '14px', color: '#6b7280', margin: '4px 0 0' }}>
-              {activeTab === 'dashboard' && '查看你的学习进度和最新动态'}
-              {activeTab === 'assignments' && '管理和完成你的作业任务'}
-              {activeTab === 'courseware' && '浏览学习资源和课件材料'}
-              {activeTab === 'qa' && '与教师进行在线问答交流'}
-              {activeTab === 'reports' && '查看详细的学习数据分析'}
+              {activeTab === 'dashboard' && t('viewDetailedAnalysis')}
+              {activeTab === 'assignments' && t('myAssignments')}
+              {activeTab === 'courseware' && t('resourceLibrary')}
+              {activeTab === 'qa' && t('contactTeacherForHelp')}
+              {activeTab === 'reports' && t('viewDetailedAnalysis')}
             </p>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            {/* 语言切换按钮 */}
+            <LanguageSwitch />
+            
             {/* 通知铃铛 */}
             <div style={{ position: 'relative' }}>
               <button
@@ -367,12 +374,17 @@ const NewStudentDashboard = ({ user, data, onOpenEditor, onLogout }) => {
           }}
         />
       )}
+
+      {/* AI 助手 */}
+      <AIAssistant userRole="student" userName={user.name} />
     </div>
   );
 };
 
 // 学习概览组件
 const DashboardContent = ({ user, assignments, mySubmissions, completedCount, pendingCount, learningStats, setShowStatsDetail }) => {
+  const { t } = useLanguage();
+  
   // 计算即将截止的作业
   const getUrgentAssignments = () => {
     const now = new Date();
@@ -399,10 +411,10 @@ const DashboardContent = ({ user, assignments, mySubmissions, completedCount, pe
         marginBottom: '32px'
       }}>
         <h2 style={{ fontSize: '28px', fontWeight: '600', marginBottom: '8px' }}>
-          欢迎回来，{user.name}！
+          {t('welcomeBack')}，{user.name}！
         </h2>
         <p style={{ opacity: 0.9, marginBottom: '24px', fontSize: '16px' }}>
-          继续你的编程学习之旅，今天也要加油哦！
+          {t('continueYourJourney')}
         </p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
           <div 
@@ -420,7 +432,7 @@ const DashboardContent = ({ user, assignments, mySubmissions, completedCount, pe
             <div style={{ fontSize: '32px', fontWeight: '700', marginBottom: '4px' }}>
               {completedCount}
             </div>
-            <div style={{ opacity: 0.8, fontSize: '14px' }}>已完成作业</div>
+            <div style={{ opacity: 0.8, fontSize: '14px' }}>{t('completedAssignments')}</div>
           </div>
           <div 
             onClick={() => setShowStatsDetail('pending')}
@@ -437,7 +449,7 @@ const DashboardContent = ({ user, assignments, mySubmissions, completedCount, pe
             <div style={{ fontSize: '32px', fontWeight: '700', marginBottom: '4px' }}>
               {pendingCount}
             </div>
-            <div style={{ opacity: 0.8, fontSize: '14px' }}>待完成作业</div>
+            <div style={{ opacity: 0.8, fontSize: '14px' }}>{t('pendingAssignments')}</div>
           </div>
           <div 
             onClick={() => setShowStatsDetail('score')}
@@ -454,7 +466,7 @@ const DashboardContent = ({ user, assignments, mySubmissions, completedCount, pe
             <div style={{ fontSize: '32px', fontWeight: '700', marginBottom: '4px' }}>
               {learningStats.averageScore}
             </div>
-            <div style={{ opacity: 0.8, fontSize: '14px' }}>平均分数</div>
+            <div style={{ opacity: 0.8, fontSize: '14px' }}>{t('averageScore')}</div>
           </div>
         </div>
       </div>
@@ -492,7 +504,7 @@ const DashboardContent = ({ user, assignments, mySubmissions, completedCount, pe
               <div style={{ fontSize: '20px', fontWeight: '700', color: '#1a1a2e' }}>
                 {learningStats.masteredTopics}/{learningStats.totalTopics}
               </div>
-              <div style={{ fontSize: '12px', color: '#888' }}>知识点掌握</div>
+              <div style={{ fontSize: '12px', color: '#888' }}>{t('knowledgeMastery')}</div>
             </div>
           </div>
           <div style={{ width: '100%', height: '6px', background: '#f0f0f0', borderRadius: '3px', overflow: 'hidden' }}>
@@ -536,7 +548,7 @@ const DashboardContent = ({ user, assignments, mySubmissions, completedCount, pe
               <div style={{ fontSize: '20px', fontWeight: '700', color: '#1a1a2e' }}>
                 {learningStats.weeklyHours}h
               </div>
-              <div style={{ fontSize: '12px', color: '#888' }}>本周学习</div>
+              <div style={{ fontSize: '12px', color: '#888' }}>{t('weeklyStudyTime')}</div>
             </div>
           </div>
           <div style={{ display: 'flex', gap: '2px', height: '40px', alignItems: 'end' }}>
@@ -576,7 +588,7 @@ const DashboardContent = ({ user, assignments, mySubmissions, completedCount, pe
               <div style={{ fontSize: '20px', fontWeight: '700', color: '#1a1a2e' }}>
                 {learningStats.averageScore}
               </div>
-              <div style={{ fontSize: '12px', color: '#888' }}>平均得分</div>
+              <div style={{ fontSize: '12px', color: '#888' }}>{t('averageScore')}</div>
             </div>
           </div>
           <div style={{ display: 'flex', gap: '2px', height: '40px', alignItems: 'end' }}>
@@ -623,11 +635,11 @@ const DashboardContent = ({ user, assignments, mySubmissions, completedCount, pe
               <div style={{ fontSize: '20px', fontWeight: '700', color: '#1a1a2e' }}>
                 3
               </div>
-              <div style={{ fontSize: '12px', color: '#888' }}>学习徽章</div>
+              <div style={{ fontSize: '12px', color: '#888' }}>{t('earnedBadges')}</div>
             </div>
           </div>
           <div style={{ fontSize: '12px', color: '#666' }}>
-            🏆 代码新星 · 🎯 准时达人
+            🏆 {t('codingRisingStar')} · 🎯 {t('punctualPerson')}
           </div>
         </div>
       </div>
@@ -643,7 +655,7 @@ const DashboardContent = ({ user, assignments, mySubmissions, completedCount, pe
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
           <AlertCircle size={20} color="#ff4d4f" />
           <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#1a1a2e', margin: 0 }}>
-            即将截止的作业
+            {t('dueSoon')}
           </h3>
         </div>
         
@@ -662,7 +674,7 @@ const DashboardContent = ({ user, assignments, mySubmissions, completedCount, pe
                     {assign.title}
                   </h4>
                   <p style={{ fontSize: '12px', color: '#ff4d4f', margin: 0 }}>
-                    还有 {daysLeft} 天截止
+                    {t('daysLeft', { days: daysLeft })}
                   </p>
                 </div>
               );
@@ -671,8 +683,8 @@ const DashboardContent = ({ user, assignments, mySubmissions, completedCount, pe
         ) : (
           <div style={{ textAlign: 'center', padding: '40px', color: '#52c41a' }}>
             <CheckCircle size={48} color="#52c41a" style={{ marginBottom: '16px' }} />
-            <div style={{ fontSize: '16px', fontWeight: '500', marginBottom: '8px' }}>太棒了！</div>
-            <div style={{ fontSize: '14px' }}>暂无紧急作业，继续保持！</div>
+            <div style={{ fontSize: '16px', fontWeight: '500', marginBottom: '8px' }}>{t('excellent')}</div>
+            <div style={{ fontSize: '14px' }}>{t('noUrgentAssignments')}</div>
           </div>
         )}
       </div>
@@ -682,6 +694,7 @@ const DashboardContent = ({ user, assignments, mySubmissions, completedCount, pe
 
 // 作业管理组件
 const AssignmentsContent = ({ assignments, mySubmissions, user, onOpenEditor, setSelectedAssignmentForAction, setShowRedoModal, setShowSubmitModal }) => {
+  const { t } = useLanguage();
   const [activeFilter, setActiveFilter] = useState('all');
   const [selectedAssignment, setSelectedAssignment] = useState(null);
 
@@ -700,9 +713,9 @@ const AssignmentsContent = ({ assignments, mySubmissions, user, onOpenEditor, se
       {/* 筛选器 */}
       <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
         {[
-          { key: 'all', label: '全部作业', count: assignments.length },
-          { key: 'pending', label: '待完成', count: pendingCount },
-          { key: 'completed', label: '已完成', count: completedCount }
+          { key: 'all', label: t('allAssignments'), count: assignments.length },
+          { key: 'pending', label: t('pending'), count: pendingCount },
+          { key: 'completed', label: t('completed'), count: completedCount }
         ].map(filter => (
           <button
             key={filter.key}
@@ -765,7 +778,7 @@ const AssignmentsContent = ({ assignments, mySubmissions, user, onOpenEditor, se
                 background: isCompleted ? '#f6ffed' : isOverdue ? '#fff2f0' : '#f0f9ff',
                 color: isCompleted ? '#52c41a' : isOverdue ? '#ff4d4f' : '#1890ff'
               }}>
-                {isCompleted ? '已完成' : isOverdue ? '已逾期' : `${daysLeft}天后截止`}
+                {isCompleted ? t('completed') : isOverdue ? t('overdue') : t('daysLeft', { days: daysLeft })}
               </div>
 
               {/* 作业信息 */}
@@ -774,7 +787,7 @@ const AssignmentsContent = ({ assignments, mySubmissions, user, onOpenEditor, se
                   {assign.title}
                 </h3>
                 <p style={{ fontSize: '14px', color: '#6b7280', lineHeight: 1.5, marginBottom: '12px' }}>
-                  {assign.description || '暂无描述'}
+                  {assign.description || t('noDescription')}
                 </p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '13px', color: '#9ca3af' }}>
                   <span>📅 截止：{assign.deadline}</span>
@@ -792,7 +805,7 @@ const AssignmentsContent = ({ assignments, mySubmissions, user, onOpenEditor, se
                   marginBottom: '16px'
                 }}>
                   <div style={{ fontSize: '14px', fontWeight: '600', color: '#52c41a', marginBottom: '4px' }}>
-                    得分：{submission.score}/100
+                    {t('grade')}：{submission.score}/100
                   </div>
                   {submission.comment && (
                     <div style={{ fontSize: '12px', color: '#666' }}>
@@ -823,9 +836,9 @@ const AssignmentsContent = ({ assignments, mySubmissions, user, onOpenEditor, se
                   }}
                 >
                   {isCompleted ? (
-                    <><Eye size={16} /> 查看详情</>
+                    <><Eye size={16} /> {t('viewDetails')}</>
                   ) : (
-                    <><FileText size={16} /> 开始作业</>
+                    <><FileText size={16} /> {t('submitAssignment')}</>
                   )}
                 </button>
 
@@ -879,7 +892,7 @@ const AssignmentsContent = ({ assignments, mySubmissions, user, onOpenEditor, se
                     }}
                   >
                     <Upload size={14} />
-                    提交
+                    {t('submit')}
                   </button>
                 )}
               </div>
@@ -903,6 +916,7 @@ const AssignmentsContent = ({ assignments, mySubmissions, user, onOpenEditor, se
 
 // 学习资源组件 - 完整实现
 const CoursewareContent = ({ setShowCodeExample }) => {
+  const { t } = useLanguage();
   const [coursewareList, setCoursewareList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -972,7 +986,7 @@ const CoursewareContent = ({ setShowCodeExample }) => {
     return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
   };
 
-  const categories = ['all', 'HTML基础', 'CSS样式', 'JavaScript', 'React框架', '其他'];
+  const categories = ['all', 'HTML', 'CSS', 'JavaScript', 'React', t('other')];
   const filteredCourseware = selectedCategory === 'all' 
     ? coursewareList 
     : coursewareList.filter(item => item.category === selectedCategory);
@@ -1022,7 +1036,7 @@ const CoursewareContent = ({ setShowCodeExample }) => {
           }}
         >
           <Code size={16} />
-          示例代码
+          {t('codeExample')}
         </button>
       </div>
 
@@ -1110,7 +1124,7 @@ const CoursewareContent = ({ setShowCodeExample }) => {
                   }}
                 >
                   <Download size={16} />
-                  下载
+                  {t('download')}
                 </button>
               </div>
             </div>
@@ -1119,8 +1133,8 @@ const CoursewareContent = ({ setShowCodeExample }) => {
       ) : (
         <div style={{ textAlign: 'center', padding: '60px', color: '#999' }}>
           <BookOpen size={48} color="#d1d5db" style={{ marginBottom: '16px' }} />
-          <div style={{ fontSize: '16px', fontWeight: '500', marginBottom: '8px' }}>暂无学习资源</div>
-          <div style={{ fontSize: '14px' }}>请联系教师上传相关课件</div>
+          <div style={{ fontSize: '16px', fontWeight: '500', marginBottom: '8px' }}>{t('noCourseware')}</div>
+          <div style={{ fontSize: '14px' }}>{t('contactTeacherForHelp')}</div>
         </div>
       )}
     </div>
@@ -1129,6 +1143,7 @@ const CoursewareContent = ({ setShowCodeExample }) => {
 
 // 在线答疑组件 - 完整实现
 const QAContent = ({ user }) => {
+  const { t } = useLanguage();
   const [qaMessages, setQaMessages] = useState([]);
   const [qaMessage, setQaMessage] = useState('');
   const [loading, setLoading] = useState(true);
@@ -1166,7 +1181,7 @@ const QAContent = ({ user }) => {
 
   const handleSubmitQuestion = async () => {
     if (!qaMessage.trim()) {
-      alert('请输入问题内容');
+      alert(t('enterQuestionContent'));
       return;
     }
 
@@ -1183,16 +1198,16 @@ const QAContent = ({ user }) => {
       });
 
       if (response.ok) {
-        alert('✅ 问题已提交！教师会尽快回复。');
+        alert(t('submitSuccess'));
         setQaMessage('');
         fetchQAMessages();
       } else {
         const errorData = await response.json();
-        alert(`❌ 提交失败：${errorData.error || '请重试'}`);
+        alert(t('submitFailed'));
       }
     } catch (error) {
       console.error('提交问题失败:', error);
-      alert('⚠️ 网络连接失败，请检查后端服务是否启动');
+      alert(t('networkError'));
     } finally {
       setSubmitting(false);
     }
@@ -1215,7 +1230,7 @@ const QAContent = ({ user }) => {
         <textarea
           value={qaMessage}
           onChange={(e) => setQaMessage(e.target.value)}
-          placeholder="在这里输入你的问题，教师会尽快回复..."
+          placeholder={t('askAnytimeTeacherReply')}
           style={{
             width: '100%',
             minHeight: '120px',
@@ -1247,12 +1262,12 @@ const QAContent = ({ user }) => {
           {submitting ? (
             <>
               <RefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} />
-              提交中...
+              {t('submitting')}
             </>
           ) : (
             <>
               <Upload size={16} />
-              提交问题
+              {t('submitQuestion')}
             </>
           )}
         </button>
@@ -1339,7 +1354,7 @@ const QAContent = ({ user }) => {
                       </div>
                       <div>
                         <div style={{ fontSize: '14px', fontWeight: '600', color: '#1a1a2e' }}>
-                          教师回复
+                          {t('reply')}
                         </div>
                         <div style={{ fontSize: '12px', color: '#9ca3af' }}>
                           {qa.answeredAt ? new Date(qa.answeredAt).toLocaleString() : '刚刚'}
@@ -1365,7 +1380,7 @@ const QAContent = ({ user }) => {
                     color: '#9ca3af',
                     fontSize: '14px'
                   }}>
-                    ⏳ 等待教师回复...
+                    {t('waitingForTeacherReplyShort')}
                   </div>
                 )}
               </div>
@@ -1374,8 +1389,8 @@ const QAContent = ({ user }) => {
         ) : (
           <div style={{ textAlign: 'center', padding: '60px', color: '#999' }}>
             <MessageCircle size={48} color="#d1d5db" style={{ marginBottom: '16px' }} />
-            <div style={{ fontSize: '16px', fontWeight: '500', marginBottom: '8px' }}>暂无问答记录</div>
-            <div style={{ fontSize: '14px' }}>有问题可以随时向教师提问</div>
+            <div style={{ fontSize: '16px', fontWeight: '500', marginBottom: '8px' }}>{t('noQuestionsYet')}</div>
+            <div style={{ fontSize: '14px' }}>{t('askAnytimeTeacherReply')}</div>
           </div>
         )}
       </div>
@@ -1385,6 +1400,8 @@ const QAContent = ({ user }) => {
 
 // 学习报告组件 - 完整实现
 const ReportsContent = ({ learningStats }) => {
+  const { t } = useLanguage();
+  
   return (
     <div>
       {/* 学习概况 */}
@@ -1396,32 +1413,32 @@ const ReportsContent = ({ learningStats }) => {
         marginBottom: '32px'
       }}>
         <h2 style={{ fontSize: '24px', fontWeight: '600', marginBottom: '24px' }}>
-          📊 学习数据分析
+          📊 {t('learningAnalysis')}
         </h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: '32px', fontWeight: '700', marginBottom: '4px' }}>
               {Math.round((learningStats.masteredTopics / learningStats.totalTopics) * 100)}%
             </div>
-            <div style={{ fontSize: '14px', opacity: 0.8 }}>知识点掌握率</div>
+            <div style={{ fontSize: '14px', opacity: 0.8 }}>{t('knowledgeMastery')}</div>
           </div>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: '32px', fontWeight: '700', marginBottom: '4px' }}>
               {learningStats.weeklyHours}h
             </div>
-            <div style={{ fontSize: '14px', opacity: 0.8 }}>本周学习时长</div>
+            <div style={{ fontSize: '14px', opacity: 0.8 }}>{t('weeklyStudyTime')}</div>
           </div>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: '32px', fontWeight: '700', marginBottom: '4px' }}>
               {learningStats.averageScore}
             </div>
-            <div style={{ fontSize: '14px', opacity: 0.8 }}>平均分数</div>
+            <div style={{ fontSize: '14px', opacity: 0.8 }}>{t('averageScoreLabel')}</div>
           </div>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: '32px', fontWeight: '700', marginBottom: '4px' }}>
               {learningStats.masteredTopics}
             </div>
-            <div style={{ fontSize: '14px', opacity: 0.8 }}>已掌握知识点</div>
+            <div style={{ fontSize: '14px', opacity: 0.8 }}>{t('masteredKnowledgePoints')}</div>
           </div>
         </div>
       </div>
@@ -1437,11 +1454,11 @@ const ReportsContent = ({ learningStats }) => {
           border: '1px solid #e5e7eb'
         }}>
           <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '20px', color: '#1a1a2e' }}>
-            🎯 知识点掌握情况
+            🎯 {t('knowledgeGraphTitle')}
           </h3>
           <div style={{ marginBottom: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span style={{ fontSize: '14px', color: '#6b7280' }}>HTML基础</span>
+              <span style={{ fontSize: '14px', color: '#6b7280' }}>HTML {t('basicSkills')}</span>
               <span style={{ fontSize: '14px', fontWeight: '600', color: '#52c41a' }}>90%</span>
             </div>
             <div style={{ width: '100%', height: '8px', background: '#f0f0f0', borderRadius: '4px', overflow: 'hidden' }}>
@@ -1450,7 +1467,7 @@ const ReportsContent = ({ learningStats }) => {
           </div>
           <div style={{ marginBottom: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span style={{ fontSize: '14px', color: '#6b7280' }}>CSS样式</span>
+              <span style={{ fontSize: '14px', color: '#6b7280' }}>CSS</span>
               <span style={{ fontSize: '14px', fontWeight: '600', color: '#1890ff' }}>75%</span>
             </div>
             <div style={{ width: '100%', height: '8px', background: '#f0f0f0', borderRadius: '4px', overflow: 'hidden' }}>
@@ -1468,7 +1485,7 @@ const ReportsContent = ({ learningStats }) => {
           </div>
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span style={{ fontSize: '14px', color: '#6b7280' }}>React框架</span>
+              <span style={{ fontSize: '14px', color: '#6b7280' }}>React</span>
               <span style={{ fontSize: '14px', fontWeight: '600', color: '#fa8c16' }}>45%</span>
             </div>
             <div style={{ width: '100%', height: '8px', background: '#f0f0f0', borderRadius: '4px', overflow: 'hidden' }}>
@@ -1486,17 +1503,17 @@ const ReportsContent = ({ learningStats }) => {
           border: '1px solid #e5e7eb'
         }}>
           <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '20px', color: '#1a1a2e' }}>
-            ⏰ 每日学习时长（本周）
+            ⏰ {t('weeklyStudyTimeTitle')}
           </h3>
           <div style={{ display: 'flex', alignItems: 'end', gap: '8px', height: '200px' }}>
             {[
-              { day: '周一', hours: 1.5 },
-              { day: '周二', hours: 2.0 },
-              { day: '周三', hours: 1.0 },
-              { day: '周四', hours: 2.5 },
-              { day: '周五', hours: 1.5 },
-              { day: '周六', hours: 0 },
-              { day: '周日', hours: 0 }
+              { day: t('monday'), hours: 1.5 },
+              { day: t('tuesday'), hours: 2.0 },
+              { day: t('wednesday'), hours: 1.0 },
+              { day: t('thursday'), hours: 2.5 },
+              { day: t('friday'), hours: 1.5 },
+              { day: t('saturday'), hours: 0 },
+              { day: t('sunday'), hours: 0 }
             ].map((item, index) => (
               <div key={index} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
                 <div style={{
@@ -1530,7 +1547,7 @@ const ReportsContent = ({ learningStats }) => {
         border: '1px solid #e5e7eb'
       }}>
         <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '20px', color: '#1a1a2e' }}>
-          📈 作业成绩趋势
+          📈 {t('assignmentScoreAnalysis')}
         </h3>
         <div style={{ display: 'flex', alignItems: 'end', gap: '4px', height: '150px' }}>
           {learningStats.scoreHistory.map((score, index) => (
@@ -1556,6 +1573,8 @@ const ReportsContent = ({ learningStats }) => {
 
 // 作业详情弹窗组件
 const AssignmentDetailModal = ({ assignment, submission, onClose, onOpenEditor }) => {
+  const { t } = useLanguage();
+  
   return (
     <div style={{
       position: 'fixed',
@@ -1597,7 +1616,7 @@ const AssignmentDetailModal = ({ assignment, submission, onClose, onOpenEditor }
                 {assignment.title}
               </h2>
               <div style={{ fontSize: '14px', opacity: 0.9 }}>
-                截止时间：{assignment.deadline}
+                {t('deadline')}：{assignment.deadline}
               </div>
             </div>
             <button
@@ -1620,7 +1639,7 @@ const AssignmentDetailModal = ({ assignment, submission, onClose, onOpenEditor }
         {/* 内容 */}
         <div style={{ flex: 1, overflow: 'auto', padding: '24px' }}>
           <div style={{ marginBottom: '24px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>作业要求</h3>
+            <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>{t('assignmentRequirements')}</h3>
             <div style={{
               background: '#f8fafc',
               borderRadius: '8px',
@@ -1629,13 +1648,13 @@ const AssignmentDetailModal = ({ assignment, submission, onClose, onOpenEditor }
               lineHeight: 1.6,
               color: '#374151'
             }}>
-              {assignment.description || assignment.requirements || '暂无详细说明'}
+              {assignment.description || assignment.requirements || t('noDescription')}
             </div>
           </div>
 
           {submission && submission.score && (
             <div style={{ marginBottom: '24px' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>批改结果</h3>
+              <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>{t('gradingResult')}</h3>
               <div style={{
                 background: '#f6ffed',
                 border: '1px solid #b7eb8f',
@@ -1643,7 +1662,7 @@ const AssignmentDetailModal = ({ assignment, submission, onClose, onOpenEditor }
                 padding: '16px'
               }}>
                 <div style={{ fontSize: '18px', fontWeight: '600', color: '#52c41a', marginBottom: '8px' }}>
-                  得分：{submission.score}/100
+                  {t('grade')}：{submission.score}/100
                 </div>
                 {submission.comment && (
                   <div style={{ fontSize: '14px', color: '#666' }}>
@@ -1657,7 +1676,7 @@ const AssignmentDetailModal = ({ assignment, submission, onClose, onOpenEditor }
           {/* 文件上传区域 */}
           {!submission && (
             <div style={{ marginBottom: '24px' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>提交作业</h3>
+              <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>{t('submitAssignment')}</h3>
               <FileUploadArea assignment={assignment} onClose={onClose} />
             </div>
           )}
@@ -1724,7 +1743,7 @@ const FileUploadArea = ({ assignment, onClose }) => {
 
   const handleSubmit = async () => {
     if (selectedFiles.length === 0) {
-      alert('请选择要提交的文件');
+      alert(t('uploadFiles'));
       return;
     }
 
@@ -1744,16 +1763,16 @@ const FileUploadArea = ({ assignment, onClose }) => {
       });
 
       if (response.ok) {
-        alert('✅ 作业提交成功！');
+        alert(t('submitSuccess'));
         onClose();
         window.location.reload();
       } else {
         const errorData = await response.json();
-        alert(`❌ 提交失败：${errorData.error || '请重试'}`);
+        alert(t('submitFailed'));
       }
     } catch (error) {
       console.error('提交失败:', error);
-      alert('❌ 网络错误，请重试');
+      alert(t('networkError'));
     } finally {
       setUploading(false);
     }
@@ -1865,12 +1884,12 @@ const FileUploadArea = ({ assignment, onClose }) => {
         {uploading ? (
           <>
             <RefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} />
-            提交中...
+            {t('submitting')}
           </>
         ) : (
           <>
             <Upload size={16} />
-            提交作业文件
+            {t('submitAssignment')}
           </>
         )}
       </button>
@@ -1880,6 +1899,8 @@ const FileUploadArea = ({ assignment, onClose }) => {
 
 // 通知面板组件
 const NotificationPanel = ({ notifications, onClose, onMarkAsRead, user }) => {
+  const { t } = useLanguage();
+  
   const markAsRead = async (notificationId) => {
     try {
       await fetch(`http://localhost:5000/api/notifications/${notificationId}/read`, {
@@ -1940,7 +1961,7 @@ const NotificationPanel = ({ notifications, onClose, onMarkAsRead, user }) => {
           justifyContent: 'space-between',
           alignItems: 'center'
         }}>
-          <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '600' }}>通知</h3>
+          <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '600' }}>{t('notifications')}</h3>
           <button
             onClick={markAllAsRead}
             style={{
@@ -1951,7 +1972,7 @@ const NotificationPanel = ({ notifications, onClose, onMarkAsRead, user }) => {
               fontSize: '14px'
             }}
           >
-            全部已读
+            {t('markAllRead')}
           </button>
         </div>
 
@@ -2015,7 +2036,7 @@ const NotificationPanel = ({ notifications, onClose, onMarkAsRead, user }) => {
               textAlign: 'center',
               color: '#9ca3af'
             }}>
-              暂无通知
+              {t('noNotifications')}
             </div>
           )}
         </div>
@@ -2026,6 +2047,7 @@ const NotificationPanel = ({ notifications, onClose, onMarkAsRead, user }) => {
 
 // 个人资料编辑弹窗
 const ProfileModal = ({ user, onClose }) => {
+  const { t } = useLanguage();
   const [profileForm, setProfileForm] = useState({
     name: user?.name || '',
     email: user?.email || '',
@@ -2037,7 +2059,7 @@ const ProfileModal = ({ user, onClose }) => {
 
   const handleSave = async () => {
     if (profileForm.password && profileForm.password !== profileForm.confirmPassword) {
-      alert('两次输入的密码不一致');
+      alert(t('passwordMismatch'));
       return;
     }
 
@@ -2089,13 +2111,13 @@ const ProfileModal = ({ user, onClose }) => {
         onClick={(e) => e.stopPropagation()}>
         
         <h2 style={{ fontSize: '24px', fontWeight: '700', marginBottom: '24px', textAlign: 'center' }}>
-          个人资料设置
+          {t('profileSettings')}
         </h2>
 
         <div style={{ display: 'grid', gap: '20px' }}>
           <div>
             <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '8px' }}>
-              姓名
+              {t('name')}
             </label>
             <input
               type="text"
@@ -2113,7 +2135,7 @@ const ProfileModal = ({ user, onClose }) => {
 
           <div>
             <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '8px' }}>
-              邮箱
+              {t('email')}
             </label>
             <input
               type="email"
@@ -2131,7 +2153,7 @@ const ProfileModal = ({ user, onClose }) => {
 
           <div>
             <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '8px' }}>
-              电话
+              {t('phone')}
             </label>
             <input
               type="tel"
@@ -2149,7 +2171,7 @@ const ProfileModal = ({ user, onClose }) => {
 
           <div>
             <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '8px' }}>
-              新密码（留空则不修改）
+              {t('newPassword')}
             </label>
             <input
               type="password"
@@ -2167,7 +2189,7 @@ const ProfileModal = ({ user, onClose }) => {
 
           <div>
             <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '8px' }}>
-              确认新密码
+              {t('confirmNewPassword')}
             </label>
             <input
               type="password"
@@ -2198,7 +2220,7 @@ const ProfileModal = ({ user, onClose }) => {
               fontSize: '14px'
             }}
           >
-            取消
+            {t('cancel')}
           </button>
           <button
             onClick={handleSave}
@@ -2214,7 +2236,7 @@ const ProfileModal = ({ user, onClose }) => {
               fontSize: '14px'
             }}
           >
-            {saving ? '保存中...' : '保存'}
+            {saving ? t('saving') : t('save')}
           </button>
         </div>
       </div>
@@ -2224,6 +2246,8 @@ const ProfileModal = ({ user, onClose }) => {
 
 // 统计详情弹窗组件 - 完整实现
 const StatsDetailModal = ({ type, onClose }) => {
+  const { t } = useLanguage();
+  
   const getContent = () => {
     switch(type) {
       case 'completed':
@@ -2231,10 +2255,10 @@ const StatsDetailModal = ({ type, onClose }) => {
           title: '✅ 已完成作业',
           icon: <CheckCircle size={48} color="#52c41a" />,
           data: [
-            { label: '本周完成', value: '3个', color: '#52c41a' },
-            { label: '本月完成', value: '12个', color: '#1890ff' },
-            { label: '总计完成', value: '45个', color: '#722ed1' },
-            { label: '完成率', value: '90%', color: '#fa8c16' }
+            { label: t('thisWeekCompleted'), value: '3', color: '#52c41a' },
+            { label: t('thisMonthCompleted'), value: '12', color: '#1890ff' },
+            { label: t('totalCompleted'), value: '45', color: '#722ed1' },
+            { label: t('completionRate'), value: '90%', color: '#fa8c16' }
           ]
         };
       case 'pending':
@@ -2242,21 +2266,21 @@ const StatsDetailModal = ({ type, onClose }) => {
           title: '⏳ 待完成作业',
           icon: <Clock size={48} color="#fa8c16" />,
           data: [
-            { label: '今日待完成', value: '1个', color: '#ff4d4f' },
-            { label: '本周待完成', value: '2个', color: '#fa8c16' },
-            { label: '即将逾期', value: '0个', color: '#52c41a' },
-            { label: '总计待完成', value: '5个', color: '#1890ff' }
+            { label: t('todayPending'), value: '1', color: '#ff4d4f' },
+            { label: t('thisWeekPending'), value: '2', color: '#fa8c16' },
+            { label: t('dueSoon'), value: '0', color: '#52c41a' },
+            { label: t('totalPending'), value: '5', color: '#1890ff' }
           ]
         };
       case 'score':
         return {
-          title: '📊 平均分数分析',
+          title: '📊 ' + t('averageScoreLabel') + t('learningAnalysis'),
           icon: <TrendingUp size={48} color="#667eea" />,
           data: [
-            { label: '最高分', value: '95分', color: '#52c41a' },
-            { label: '最低分', value: '72分', color: '#ff4d4f' },
-            { label: '平均分', value: '85分', color: '#667eea' },
-            { label: '进步幅度', value: '+8分', color: '#1890ff' }
+            { label: t('highestScore'), value: '95', color: '#52c41a' },
+            { label: t('lowestScore'), value: '72', color: '#ff4d4f' },
+            { label: t('averageScore'), value: '85', color: '#667eea' },
+            { label: t('progressTrend'), value: '+8', color: '#1890ff' }
           ]
         };
       case 'knowledge':
@@ -2264,10 +2288,10 @@ const StatsDetailModal = ({ type, onClose }) => {
           title: '🎯 知识点掌握详情',
           icon: <Target size={48} color="#52c41a" />,
           data: [
-            { label: 'HTML基础', value: '90%', color: '#52c41a' },
-            { label: 'CSS样式', value: '75%', color: '#1890ff' },
+            { label: `HTML ${t('basicSkills')}`, value: '90%', color: '#52c41a' },
+            { label: 'CSS', value: '75%', color: '#1890ff' },
             { label: 'JavaScript', value: '60%', color: '#722ed1' },
-            { label: 'React框架', value: '45%', color: '#fa8c16' }
+            { label: 'React', value: '45%', color: '#fa8c16' }
           ]
         };
       case 'time':
@@ -2275,10 +2299,10 @@ const StatsDetailModal = ({ type, onClose }) => {
           title: '⏰ 学习时长统计',
           icon: <Clock size={48} color="#1890ff" />,
           data: [
-            { label: '今日学习', value: '2.5小时', color: '#52c41a' },
-            { label: '本周学习', value: '8.5小时', color: '#1890ff' },
-            { label: '本月学习', value: '32小时', color: '#722ed1' },
-            { label: '总计学习', value: '156小时', color: '#fa8c16' }
+            { label: t('todayStudy'), value: '2.5h', color: '#52c41a' },
+            { label: t('thisWeekStudy'), value: '8.5h', color: '#1890ff' },
+            { label: t('thisMonthStudy'), value: '32h', color: '#722ed1' },
+            { label: t('totalStudy'), value: '156h', color: '#fa8c16' }
           ]
         };
       case 'badge':
@@ -2374,14 +2398,17 @@ const StatsDetailModal = ({ type, onClose }) => {
           fontSize: '14px',
           fontWeight: '500'
         }}>
-          关闭
+          {t('close')}
         </button>
       </div>
     </div>
   );
 };
 
-const CodeExampleModal = ({ onClose }) => (
+const CodeExampleModal = ({ onClose }) => {
+  const { t } = useLanguage();
+  
+  return (
   <div style={{
     position: 'fixed',
     top: 0,
@@ -2403,7 +2430,7 @@ const CodeExampleModal = ({ onClose }) => (
       maxHeight: '80vh',
       overflow: 'auto'
     }} onClick={(e) => e.stopPropagation()}>
-      <h2>示例代码</h2>
+      <h2>{t('codeExample')}</h2>
       <pre style={{
         background: '#f8f9fa',
         padding: '20px',
@@ -2431,13 +2458,17 @@ const CodeExampleModal = ({ onClose }) => (
         cursor: 'pointer',
         marginTop: '20px'
       }}>
-        关闭
+        {t('close')}
       </button>
     </div>
   </div>
-);
+  );
+};
 
-const SubmitMethodModal = ({ assignment, onClose, onOpenEditor }) => (
+const SubmitMethodModal = ({ assignment, onClose, onOpenEditor }) => {
+  const { t } = useLanguage();
+  
+  return (
   <div style={{
     position: 'fixed',
     top: 0,
@@ -2457,7 +2488,7 @@ const SubmitMethodModal = ({ assignment, onClose, onOpenEditor }) => (
       maxWidth: '500px',
       width: '90%'
     }} onClick={(e) => e.stopPropagation()}>
-      <h2 style={{ textAlign: 'center', marginBottom: '24px' }}>选择提交方式</h2>
+      <h2 style={{ textAlign: 'center', marginBottom: '24px' }}>{t('submitAssignment')}</h2>
       
       <div style={{ display: 'grid', gap: '16px' }}>
         <button
@@ -2498,8 +2529,8 @@ const SubmitMethodModal = ({ assignment, onClose, onOpenEditor }) => (
           }}
         >
           <Upload size={32} color="#16a34a" style={{ marginBottom: '12px' }} />
-          <div style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>文件上传</div>
-          <div style={{ fontSize: '14px', color: '#6b7280' }}>上传完成的作业文件</div>
+          <div style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>{t('uploadFiles')}</div>
+          <div style={{ fontSize: '14px', color: '#6b7280' }}>{t('submitAssignment')}</div>
         </button>
       </div>
 
@@ -2515,19 +2546,21 @@ const SubmitMethodModal = ({ assignment, onClose, onOpenEditor }) => (
           marginTop: '20px'
         }}
       >
-        取消
+        {t('cancel')}
       </button>
     </div>
   </div>
-);
+  );
+};
 
 const RedoRequestModal = ({ assignment, user, onClose }) => {
+  const { t } = useLanguage();
   const [reason, setReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async () => {
     if (!reason.trim()) {
-      alert('请填写重做原因');
+      alert(t('redoReason'));
       return;
     }
 
@@ -2544,14 +2577,14 @@ const RedoRequestModal = ({ assignment, user, onClose }) => {
       });
 
       if (response.ok) {
-        alert('✅ 重做申请已提交！');
+        alert(t('submitSuccess'));
         onClose();
       } else {
-        alert('❌ 提交失败，请重试');
+        alert(t('submitFailed'));
       }
     } catch (error) {
       console.error('提交重做申请失败:', error);
-      alert('❌ 网络错误，请重试');
+      alert(t('networkError'));
     } finally {
       setSubmitting(false);
     }
@@ -2577,19 +2610,19 @@ const RedoRequestModal = ({ assignment, user, onClose }) => {
         maxWidth: '500px',
         width: '90%'
       }} onClick={(e) => e.stopPropagation()}>
-        <h2 style={{ marginBottom: '20px' }}>申请重做作业</h2>
+        <h2 style={{ marginBottom: '20px' }}>{t('applyForRedoAssignment')}</h2>
         <p style={{ color: '#6b7280', marginBottom: '20px' }}>
-          作业：{assignment.title}
+          {t('assignmentTitle')}：{assignment.title}
         </p>
         
         <div style={{ marginBottom: '20px' }}>
           <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '8px' }}>
-            重做原因
+            {t('redoReason')}
           </label>
           <textarea
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            placeholder="请说明申请重做的原因..."
+            placeholder={t('redoReasonPlaceholder')}
             style={{
               width: '100%',
               height: '120px',
@@ -2615,7 +2648,7 @@ const RedoRequestModal = ({ assignment, user, onClose }) => {
               cursor: 'pointer'
             }}
           >
-            取消
+            {t('cancel')}
           </button>
           <button
             onClick={handleSubmit}
@@ -2630,7 +2663,7 @@ const RedoRequestModal = ({ assignment, user, onClose }) => {
               cursor: submitting ? 'not-allowed' : 'pointer'
             }}
           >
-            {submitting ? '提交中...' : '提交申请'}
+            {submitting ? t('submitting') : t('submitRedoRequest')}
           </button>
         </div>
       </div>

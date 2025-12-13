@@ -9,6 +9,10 @@ import PPTImageViewer from './PPTImageViewer';
 import UniversalFileViewer from './UniversalFileViewer';
 import AnchorEditor from './AnchorEditor';
 import AnchorDemo from './AnchorDemo';
+import { useLanguage } from '../i18n/LanguageContext';
+import { interpolate } from '../i18n/translations';
+import LanguageSwitch from '../i18n/LanguageSwitch';
+import AIAssistant from './AIAssistant';
 
 // 工具函数：生成头像颜色
 const getAvatarColor = (name) => {
@@ -36,6 +40,7 @@ const isOverdue = (deadline) => {
 
 // 学生名单管理组件
 const StudentManager = ({ students, setStudents }) => {
+  const { t } = useLanguage();
   const [selectedIds, setSelectedIds] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({});
@@ -88,14 +93,14 @@ const StudentManager = ({ students, setStudents }) => {
         setDeleteTarget(null);
       }
     } catch (error) {
-      console.error('删除学生失败:', error);
-      alert('删除失败，请重试');
+      console.error(t('deleteStudentFailed'), error);
+      alert(t('deleteFailedRetry'));
     }
   };
 
   const handleBatchDelete = () => {
     if(selectedIds.length === 0) return;
-    if(window.confirm(`确定删除选中的 ${selectedIds.length} 名学生吗？`)) {
+    if(window.confirm(interpolate(t('confirmDeleteSelected'), { count: selectedIds.length }))) {
       setStudents(students.filter(s => !selectedIds.includes(s.id)));
       setSelectedIds([]);
     }
@@ -108,7 +113,7 @@ const StudentManager = ({ students, setStudents }) => {
 
   const handleAddStudent = async () => {
     if (!addForm.id || !addForm.name || !addForm.password) {
-      alert('请填写学号、姓名和密码');
+      alert(t('fillStudentInfo'));
       return;
     }
     
@@ -124,20 +129,20 @@ const StudentManager = ({ students, setStudents }) => {
         setStudents([...students, newStudent]);
         setShowAddModal(false);
         setAddForm({ id: '', name: '', class: '', email: '', phone: '', password: '' });
-        alert('✅ 学生添加成功！');
+        alert(t('studentAddedSuccess'));
       } else {
         const error = await response.json();
-        alert(`❌ 添加失败：${error.error}`);
+        alert(interpolate(t('addFailedError'), { error: error.error }));
       }
     } catch (error) {
-      console.error('添加学生失败:', error);
-      alert('添加失败，请重试');
+      console.error(t('addStudentFailed'), error);
+      alert(t('addFailedRetry'));
     }
   };
 
   const handleUpdateStudent = async () => {
     if (!editForm.name) {
-      alert('请填写姓名');
+      alert(t('fillNameRequired'));
       return;
     }
     
@@ -196,7 +201,7 @@ const StudentManager = ({ students, setStudents }) => {
             <Search size={18} color="#999" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
             <input
               type="text"
-              placeholder="搜索学号、姓名或班级..."
+              placeholder={t('searchStudentPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{
@@ -234,7 +239,7 @@ const StudentManager = ({ students, setStudents }) => {
             }}
             onMouseEnter={(e) => e.currentTarget.style.background = '#5568d3'}
             onMouseLeave={(e) => e.currentTarget.style.background = '#667eea'}>
-            <Plus size={16}/> 添加学生
+            <Plus size={16}/> {t('addStudent')}
           </button>
           <label style={{
             padding: '10px 16px',
@@ -251,7 +256,7 @@ const StudentManager = ({ students, setStudents }) => {
           }}
           onMouseEnter={(e) => e.currentTarget.style.background = '#15803d'}
           onMouseLeave={(e) => e.currentTarget.style.background = '#16a34a'}>
-            <Upload size={16}/> 导入CSV
+            <Upload size={16}/> {t('importCSV')}
             <input type="file" accept=".csv" style={{display:'none'}} onChange={handleFileUpload}/>
           </label>
           <button
@@ -270,7 +275,7 @@ const StudentManager = ({ students, setStudents }) => {
             }}
             onMouseEnter={(e) => selectedIds.length && (e.currentTarget.style.background = '#dc2626')}
             onMouseLeave={(e) => selectedIds.length && (e.currentTarget.style.background = '#ef4444')}>
-            批量删除 {selectedIds.length > 0 && `(${selectedIds.length})`}
+            {t('batchDelete')} {selectedIds.length > 0 && `(${selectedIds.length})`}
           </button>
         </div>
       </div>
@@ -301,9 +306,9 @@ const StudentManager = ({ students, setStudents }) => {
                   style={{ cursor: 'pointer' }}
                 />
               </th>
-              <th style={{padding:'14px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#6b7280'}}>学号</th>
-              <th style={{padding:'14px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#6b7280'}}>姓名</th>
-              <th style={{padding:'14px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#6b7280'}}>班级</th>
+              <th style={{padding:'14px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#6b7280'}}>{t('studentId')}</th>
+              <th style={{padding:'14px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#6b7280'}}>{t('realName')}</th>
+              <th style={{padding:'14px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#6b7280'}}>{t('className')}</th>
               <th style={{padding:'14px', textAlign: 'right', fontSize: '13px', fontWeight: '600', color: '#6b7280', width: '150px'}}>操作</th>
             </tr>
           </thead>
@@ -377,7 +382,7 @@ const StudentManager = ({ students, setStudents }) => {
                       }}
                       onMouseEnter={(e) => e.currentTarget.style.background = '#bfdbfe'}
                       onMouseLeave={(e) => e.currentTarget.style.background = '#dbeafe'}>
-                      <Edit2 size={14} /> 编辑
+                      <Edit2 size={14} /> {t('edit')}
                     </button>
                     <button
                       onClick={() => handleDelete(s.id)}
@@ -397,7 +402,7 @@ const StudentManager = ({ students, setStudents }) => {
                       }}
                       onMouseEnter={(e) => e.currentTarget.style.background = '#fecaca'}
                       onMouseLeave={(e) => e.currentTarget.style.background = '#fee2e2'}>
-                      <Trash2 size={14} /> 删除
+                      <Trash2 size={14} /> {t('delete')}
                     </button>
                   </div>
                 </td>
@@ -414,10 +419,10 @@ const StudentManager = ({ students, setStudents }) => {
         }}>
           <Users size={64} color="#d1d5db" style={{ marginBottom: '16px' }} />
           <div style={{ fontSize: '18px', fontWeight: '600', color: '#6b7280', marginBottom: '8px' }}>
-            {searchQuery ? '未找到匹配的学生' : '暂无学生数据'}
+            {searchQuery ? t('noMatchingStudents') : t('noStudentsData')}
           </div>
           <div style={{ fontSize: '14px', color: '#9ca3af', marginBottom: '20px' }}>
-            {searchQuery ? '尝试使用其他关键词搜索' : '点击上方"导入名单"按钮添加学生'}
+            {searchQuery ? t('tryOtherKeywords') : t('clickImportButton')}
           </div>
         </div>
       )}
@@ -457,7 +462,7 @@ const StudentManager = ({ students, setStudents }) => {
               </div>
               <div>
                 <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '600', color: '#1a1a2e' }}>
-                  确认删除
+                  {t('confirmDelete')}
                 </h3>
                 <p style={{ margin: '4px 0 0', fontSize: '14px', color: '#6b7280' }}>
                   此操作无法撤销
@@ -465,7 +470,7 @@ const StudentManager = ({ students, setStudents }) => {
               </div>
             </div>
             <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '24px', lineHeight: 1.6 }}>
-              确定要删除该学生吗？删除后，该学生的所有作业提交记录也将被清除。
+              {t('confirmDeleteStudentDetail')}
             </p>
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
               <button
@@ -497,7 +502,7 @@ const StudentManager = ({ students, setStudents }) => {
                   fontSize: '14px',
                   fontWeight: '500'
                 }}>
-                确认删除
+                {t('confirmDelete')}
               </button>
             </div>
           </div>
@@ -516,17 +521,17 @@ const StudentManager = ({ students, setStudents }) => {
             width: '500px', boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
           }}>
             <h3 style={{ margin: '0 0 24px', fontSize: '20px', fontWeight: '600', color: '#1a1a2e' }}>
-              添加学生
+              {t('addStudent')}
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500' }}>
-                  学号 *
+                  {t('studentId')} *
                 </label>
                 <input
                   value={addForm.id}
                   onChange={(e) => setAddForm({...addForm, id: e.target.value})}
-                  placeholder="请输入学号"
+                  placeholder={t('enterStudentId')}
                   style={{
                     width: '100%', padding: '10px', border: '2px solid #e5e7eb',
                     borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box'
@@ -537,12 +542,12 @@ const StudentManager = ({ students, setStudents }) => {
               </div>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500' }}>
-                  姓名 *
+                  {t('realName')} *
                 </label>
                 <input
                   value={addForm.name}
                   onChange={(e) => setAddForm({...addForm, name: e.target.value})}
-                  placeholder="请输入姓名"
+                  placeholder={t('enterName')}
                   style={{
                     width: '100%', padding: '10px', border: '2px solid #e5e7eb',
                     borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box'
@@ -553,12 +558,12 @@ const StudentManager = ({ students, setStudents }) => {
               </div>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500' }}>
-                  班级
+                  {t('className')}
                 </label>
                 <input
                   value={addForm.class}
                   onChange={(e) => setAddForm({...addForm, class: e.target.value})}
-                  placeholder="请输入班级"
+                  placeholder={t('enterClass')}
                   style={{
                     width: '100%', padding: '10px', border: '2px solid #e5e7eb',
                     borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box'
@@ -569,13 +574,13 @@ const StudentManager = ({ students, setStudents }) => {
               </div>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500' }}>
-                  邮箱
+                  {t('email')}
                 </label>
                 <input
                   type="email"
                   value={addForm.email}
                   onChange={(e) => setAddForm({...addForm, email: e.target.value})}
-                  placeholder="请输入邮箱"
+                  placeholder={t('enterEmail')}
                   style={{
                     width: '100%', padding: '10px', border: '2px solid #e5e7eb',
                     borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box'
@@ -586,13 +591,13 @@ const StudentManager = ({ students, setStudents }) => {
               </div>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500' }}>
-                  手机号
+                  {t('phoneNumber')}
                 </label>
                 <input
                   type="tel"
                   value={addForm.phone}
                   onChange={(e) => setAddForm({...addForm, phone: e.target.value})}
-                  placeholder="请输入手机号"
+                  placeholder={t('enterPhone')}
                   style={{
                     width: '100%', padding: '10px', border: '2px solid #e5e7eb',
                     borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box'
@@ -603,13 +608,13 @@ const StudentManager = ({ students, setStudents }) => {
               </div>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500' }}>
-                  密码 *
+                  {t('password')} *
                 </label>
                 <input
                   type="password"
                   value={addForm.password}
                   onChange={(e) => setAddForm({...addForm, password: e.target.value})}
-                  placeholder="请输入密码（至少6位）"
+                  placeholder={t('enterPasswordAtLeast6')}
                   style={{
                     width: '100%', padding: '10px', border: '2px solid #e5e7eb',
                     borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box'
@@ -629,7 +634,7 @@ const StudentManager = ({ students, setStudents }) => {
                   padding: '10px 20px', background: '#f3f4f6', border: 'none',
                   borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', color: '#6b7280'
                 }}>
-                取消
+                {t('cancel')}
               </button>
               <button
                 onClick={handleAddStudent}
@@ -637,7 +642,7 @@ const StudentManager = ({ students, setStudents }) => {
                   padding: '10px 20px', background: '#667eea', color: 'white', border: 'none',
                   borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '500'
                 }}>
-                添加
+                {t('add')}
               </button>
             </div>
           </div>
@@ -656,7 +661,7 @@ const StudentManager = ({ students, setStudents }) => {
             width: '500px', boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
           }}>
             <h3 style={{ margin: '0 0 24px', fontSize: '20px', fontWeight: '600', color: '#1a1a2e' }}>
-              编辑学生信息
+              {t('editStudentInfo')}
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
@@ -683,7 +688,7 @@ const StudentManager = ({ students, setStudents }) => {
                 <input
                   value={editForm.name}
                   onChange={(e) => setEditForm({...editForm, name: e.target.value})}
-                  placeholder="请输入姓名"
+                  placeholder={t('enterName')}
                   style={{
                     width: '100%', padding: '10px', border: '2px solid #e5e7eb',
                     borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box'
@@ -699,7 +704,7 @@ const StudentManager = ({ students, setStudents }) => {
                 <input
                   value={editForm.class}
                   onChange={(e) => setEditForm({...editForm, class: e.target.value})}
-                  placeholder="请输入班级"
+                  placeholder={t('enterClass')}
                   style={{
                     width: '100%', padding: '10px', border: '2px solid #e5e7eb',
                     borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box'
@@ -716,7 +721,7 @@ const StudentManager = ({ students, setStudents }) => {
                   type="email"
                   value={editForm.email || ''}
                   onChange={(e) => setEditForm({...editForm, email: e.target.value})}
-                  placeholder="请输入邮箱"
+                  placeholder={t('enterEmailAddress')}
                   style={{
                     width: '100%', padding: '10px', border: '2px solid #e5e7eb',
                     borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box'
@@ -733,7 +738,7 @@ const StudentManager = ({ students, setStudents }) => {
                   type="tel"
                   value={editForm.phone || ''}
                   onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
-                  placeholder="请输入手机号"
+                  placeholder={t('enterPhoneNumber')}
                   style={{
                     width: '100%', padding: '10px', border: '2px solid #e5e7eb',
                     borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box'
@@ -750,7 +755,7 @@ const StudentManager = ({ students, setStudents }) => {
                   type="password"
                   value={editForm.password || ''}
                   onChange={(e) => setEditForm({...editForm, password: e.target.value})}
-                  placeholder="请输入新密码（至少6位）"
+                  placeholder={t('enterNewPasswordMin6')}
                   style={{
                     width: '100%', padding: '10px', border: '2px solid #e5e7eb',
                     borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box'
@@ -775,7 +780,7 @@ const StudentManager = ({ students, setStudents }) => {
                   padding: '10px 20px', background: '#667eea', color: 'white', border: 'none',
                   borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '500'
                 }}>
-                保存修改
+                {t('saveChanges')}
               </button>
             </div>
           </div>
@@ -787,6 +792,7 @@ const StudentManager = ({ students, setStudents }) => {
 
 // 代码库管理组件
 const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('snippets'); // 'snippets' | 'visualizations'
   const [showModal, setShowModal] = useState(false);
   const [editingSnippet, setEditingSnippet] = useState(null);
@@ -805,8 +811,8 @@ const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
   });
 
   const addSnippet = async () => {
-    if(!newSnippet.title) return alert('请输入标题');
-    if(!newSnippet.content) return alert('请输入代码内容');
+    if(!newSnippet.title) return alert(t('enterTitle'));
+    if(!newSnippet.content) return alert(t('enterCodeContent'));
     
     try {
       if(editingSnippet) {
@@ -836,13 +842,13 @@ const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
       setEditingSnippet(null);
       setNewSnippet({ title: '', category: 'HTML/CSS', content: '' });
     } catch (error) {
-      console.error('保存代码片段失败:', error);
-      alert('保存失败，请重试');
+      console.error(t('saveCodeFailed'), error);
+      alert(t('saveFailedRetry'));
     }
   };
 
   const deleteSnippet = async (id) => {
-    if(window.confirm('删除此代码片段？')) {
+    if(window.confirm(t('deleteCodeSnippet'))) {
       try {
         const response = await fetch(`http://localhost:5000/api/code-library/${id}`, {
           method: 'DELETE'
@@ -852,8 +858,8 @@ const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
           setRepo(repo.filter(r => r.id !== id));
         }
       } catch (error) {
-        console.error('删除代码片段失败:', error);
-        alert('删除失败，请重试');
+        console.error(t('deleteCodeFailed'), error);
+        alert(t('deleteFailedRetry'));
       }
     }
   };
@@ -881,7 +887,7 @@ const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
       onSave: (updatedFiles) => {
         const updatedContent = updatedFiles[fileName] || item.content;
         setRepo(repo.map(r => r.id === item.id ? { ...r, content: updatedContent } : r));
-        alert('✅ 代码已保存到代码库');
+        alert(t('codeSavedToLibrary'));
       }
     });
   };
@@ -904,15 +910,15 @@ const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
         setVisualizations(data);
       }
     } catch (error) {
-      console.error('加载可视化示例失败:', error);
+      console.error(t('loadVisualizationFailed'), error);
     }
   };
 
   // 添加/更新可视化示例
   const saveVisualization = async () => {
-    if (!newViz.title) return alert('请输入标题');
+    if (!newViz.title) return alert(t('enterTitleRequired'));
     if (!newViz.files || Object.keys(newViz.files).length === 0) {
-      return alert('请添加文件内容');
+      return alert(t('addFileContent'));
     }
 
     try {
@@ -925,7 +931,7 @@ const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
         
         if (response.ok) {
           await loadVisualizations();
-          alert('✅ 可视化示例更新成功！');
+          alert(t('visualizationUpdateSuccess'));
         }
       } else {
         const response = await fetch('http://localhost:5000/api/visualization-examples', {
@@ -936,7 +942,7 @@ const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
         
         if (response.ok) {
           await loadVisualizations();
-          alert('✅ 可视化示例创建成功！');
+          alert(t('visualizationCreateSuccess'));
         }
       }
       
@@ -944,14 +950,14 @@ const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
       setEditingViz(null);
       setNewViz({ title: '', description: '', category: '条形图', files: {} });
     } catch (error) {
-      console.error('保存可视化示例失败:', error);
-      alert('保存失败，请重试');
+      console.error(t('saveVisualizationFailed'), error);
+      alert(t('saveFailedRetry'));
     }
   };
 
   // 删除可视化示例
   const deleteVisualization = async (id) => {
-    if (window.confirm('确定删除此可视化示例？')) {
+    if (window.confirm(t('deleteVisualizationConfirm'))) {
       try {
         const response = await fetch(`http://localhost:5000/api/visualization-examples/${id}`, {
           method: 'DELETE'
@@ -959,11 +965,11 @@ const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
         
         if (response.ok) {
           await loadVisualizations();
-          alert('✅ 删除成功！');
+          alert(t('deleteVisualizationSuccess'));
         }
       } catch (error) {
-        console.error('删除可视化示例失败:', error);
-        alert('删除失败，请重试');
+        console.error(t('deleteVisualizationFailed'), error);
+        alert(t('deleteFailedRetry'));
       }
     }
   };
@@ -989,7 +995,7 @@ const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
           ...newViz,
           files: projectData.files
         });
-        alert('✅ 项目已导入！请填写标题和描述后保存。');
+        alert(t('projectImported'));
       }
     });
   };
@@ -1033,7 +1039,7 @@ const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
             transition: 'all 0.3s'
           }}
         >
-          💻 代码片段
+          💻 {t('codeSnippets')}
         </button>
         <button
           onClick={() => setActiveTab('visualizations')}
@@ -1049,7 +1055,7 @@ const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
             transition: 'all 0.3s'
           }}
         >
-          📊 可视化示例
+          📊 {t('visualizationExamples')}
         </button>
       </div>
 
@@ -1057,10 +1063,10 @@ const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div>
           <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '600', color: '#1a1a2e' }}>
-            {activeTab === 'snippets' ? '代码片段' : '可视化示例'}
+            {activeTab === 'snippets' ? t('codeSnippets') : t('visualizationExamples')}
           </h3>
           <p style={{ margin: '4px 0 0', fontSize: '14px', color: '#6b7280' }}>
-            共 {activeTab === 'snippets' ? repo.length : visualizations.length} 个{activeTab === 'snippets' ? '代码片段' : '示例'}
+            {interpolate(activeTab === 'snippets' ? t('totalCodeSnippets') : t('totalCourseware'), { count: activeTab === 'snippets' ? repo.length : visualizations.length })}
           </p>
         </div>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
@@ -1108,7 +1114,7 @@ const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
               fontSize: '14px',
               fontWeight: '500'
             }}>
-            <Plus size={16}/> 添加代码
+            <Plus size={16}/> {t('addCode')}
           </button>
         </div>
       </div>
@@ -1122,10 +1128,10 @@ const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
         }}>
           <Database size={64} color="#d1d5db" style={{ marginBottom: '16px' }} />
           <div style={{ fontSize: '18px', fontWeight: '600', color: '#6b7280', marginBottom: '8px' }}>
-            {filter ? '未找到匹配的代码' : '暂无代码片段'}
+            {filter ? t('noMatchingCode') : t('noCodeSnippets')}
           </div>
           <div style={{ fontSize: '14px', color: '#9ca3af' }}>
-            {filter ? '尝试使用其他关键词搜索' : '点击上方"添加代码"按钮创建第一个代码片段'}
+            {filter ? t('tryOtherKeywords') : t('clickAddCodeButton')}
           </div>
         </div>
       ) : activeTab === 'snippets' ? (
@@ -1210,7 +1216,7 @@ const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.background = '#bbf7d0'}
                   onMouseLeave={(e) => e.currentTarget.style.background = '#dcfce7'}>
-                  <Edit2 size={14}/> 编辑
+                  <Edit2 size={14}/> {t('edit')}
                 </button>
                 <button 
                   onClick={() => startEdit(item)} 
@@ -1382,7 +1388,7 @@ const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.background = '#bfdbfe'}
                   onMouseLeave={(e) => e.currentTarget.style.background = '#dbeafe'}>
-                  ✏️ 编辑
+                  ✏️ {t('edit')}
                 </button>
                 <button 
                   onClick={() => deleteVisualization(viz.id)} 
@@ -1403,7 +1409,7 @@ const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.background = '#fecaca'}
                   onMouseLeave={(e) => e.currentTarget.style.background = '#fee2e2'}>
-                  🗑️ 删除
+                  🗑️ {t('delete')}
                 </button>
               </div>
             </div>
@@ -1435,7 +1441,7 @@ const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
               background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
             }}>
               <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '600', color: 'white' }}>
-                {editingSnippet ? '编辑代码片段' : '添加代码片段'}
+                {editingSnippet ? t('editCodeSnippet') : t('addCodeSnippet')}
               </h3>
             </div>
 
@@ -1576,7 +1582,7 @@ const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
             }}>
               <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '600', color: 'white', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span>📊</span>
-                {editingViz ? '编辑可视化示例' : '添加可视化示例'}
+                {editingViz ? t('editVisualizationExample') : t('addVisualizationExample')}
               </h3>
             </div>
 
@@ -1612,7 +1618,7 @@ const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
                   }} 
                   value={newViz.description} 
                   onChange={e=>setNewViz({...newViz, description:e.target.value})} 
-                  placeholder="简要描述这个可视化示例的功能和用途..."
+                  placeholder={t('describeVisualization')}
                 />
               </div>
 
@@ -1685,7 +1691,7 @@ const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
                     <div>
                       <div style={{ fontSize: '40px', marginBottom: '12px' }}>📁</div>
                       <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '16px' }}>
-                        暂无文件，请从编辑器导入项目
+                        {t('noFilesImportFromEditor')}
                       </div>
                       <button
                         onClick={importFromEditor}
@@ -1700,13 +1706,13 @@ const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
                           fontWeight: '500'
                         }}
                       >
-                        📥 从编辑器导入
+                        {t('importFromEditorButton')}
                       </button>
                     </div>
                   )}
                 </div>
                 <p style={{ fontSize: '12px', color: '#9ca3af', marginTop: '8px' }}>
-                  💡 提示：在编辑器中创建好项目后，点击"从编辑器导入"按钮
+                  {t('tipImportFromEditor')}
                 </p>
               </div>
             </div>
@@ -1761,6 +1767,7 @@ const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
 
 // 课件管理组件
 const CoursewareManagement = ({ onOpenEditor }) => {
+  const { t } = useLanguage();
   const [courseware, setCourseware] = useState([]);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showAnchorEditor, setShowAnchorEditor] = useState(false);
@@ -1789,7 +1796,7 @@ const CoursewareManagement = ({ onOpenEditor }) => {
         setCourseware(data);
       }
     } catch (error) {
-      console.error('加载课件失败:', error);
+      console.error(t('loadCoursewareFailed'), error);
     }
   };
 
@@ -1808,7 +1815,7 @@ const CoursewareManagement = ({ onOpenEditor }) => {
 
   const handleUpload = async () => {
     if (!uploadForm.title) {
-      alert('请输入课件标题');
+      alert(t('enterCoursewareTitle'));
       return;
     }
     if (!uploadForm.file) {
@@ -1832,7 +1839,7 @@ const CoursewareManagement = ({ onOpenEditor }) => {
       });
 
       if (response.ok) {
-        alert('✅ 课件上传成功！');
+        alert(t('coursewareUploadSuccess'));
         setShowUploadModal(false);
         setUploadForm({ title: '', description: '', category: 'HTML基础', file: null });
         fetchCourseware();
@@ -1841,15 +1848,15 @@ const CoursewareManagement = ({ onOpenEditor }) => {
         alert(`❌ 上传失败：${error.error}`);
       }
     } catch (error) {
-      console.error('上传课件失败:', error);
-      alert('❌ 上传失败，请检查网络连接');
+      console.error(t('uploadCoursewareFailed'), error);
+      alert(t('uploadFailedCheckNetwork'));
     }
 
     setUploading(false);
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('确定要删除这个课件吗？')) return;
+    if (!window.confirm(t('confirmDeleteCoursewareQuestion'))) return;
 
     try {
       const response = await fetch(`http://localhost:5000/api/courseware/${id}`, {
@@ -1857,12 +1864,12 @@ const CoursewareManagement = ({ onOpenEditor }) => {
       });
 
       if (response.ok) {
-        alert('✅ 课件已删除');
+        alert(t('coursewareDeleted'));
         fetchCourseware();
       }
     } catch (error) {
-      console.error('删除课件失败:', error);
-      alert('❌ 删除失败');
+      console.error(t('deleteCoursewareFailed'), error);
+      alert(t('deleteCoursewearFailedAlert'));
     }
   };
 
@@ -1884,7 +1891,7 @@ const CoursewareManagement = ({ onOpenEditor }) => {
   };
 
   const handleViewFile = (item) => {
-    console.log('🔍 TeacherDashboard - 点击查看文件:', {
+    console.log(t('clickViewFile'), {
       id: item.id,
       title: item.title,
       fileType: item.fileType,
@@ -1896,11 +1903,11 @@ const CoursewareManagement = ({ onOpenEditor }) => {
 
   // 处理锚点编辑
   const handleEditAnchors = async (item) => {
-    console.log('🔗 TeacherDashboard - 编辑锚点:', item);
+    console.log(t('editAnchorsLog'), item);
     
     // 检查是否为PPT文件
     if (!['ppt', 'pptx'].includes(item.fileType.toLowerCase())) {
-      alert('目前只支持为PPT/PPTX文件添加锚点');
+      alert(t('onlyPPTSupported'));
       return;
     }
 
@@ -1914,11 +1921,11 @@ const CoursewareManagement = ({ onOpenEditor }) => {
         setShowAnchorEditor(true);
       } else {
         const error = await response.json();
-        alert('获取课件预览失败: ' + error.error);
+        alert(t('getCoursewarePreviewFailed') + error.error);
       }
     } catch (error) {
-      console.error('获取课件预览失败:', error);
-      alert('获取课件预览失败，请重试');
+      console.error(t('getCoursewarePreviewError'), error);
+      alert(t('getCoursewarePreviewRetry'));
     }
   };
 
@@ -1940,10 +1947,10 @@ const CoursewareManagement = ({ onOpenEditor }) => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div>
           <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '600', color: '#1a1a2e' }}>
-            课件库
+            {t('coursewareLibraryTitle')}
           </h3>
           <p style={{ margin: '4px 0 0', fontSize: '14px', color: '#6b7280' }}>
-            共 {courseware.length} 个课件
+            {interpolate(t('totalCoursewareCount'), { count: courseware.length })}
           </p>
         </div>
         <button
@@ -1961,7 +1968,7 @@ const CoursewareManagement = ({ onOpenEditor }) => {
             alignItems: 'center',
             gap: '6px'
           }}>
-          <Upload size={16} /> 上传课件
+          <Upload size={16} /> {t('uploadCoursewareButton')}
         </button>
       </div>
 
@@ -1974,10 +1981,10 @@ const CoursewareManagement = ({ onOpenEditor }) => {
         }}>
           <FileText size={64} color="#d1d5db" style={{ marginBottom: '16px' }} />
           <div style={{ fontSize: '18px', fontWeight: '600', color: '#6b7280', marginBottom: '8px' }}>
-            暂无课件
+            {t('noCoursewareYet')}
           </div>
           <div style={{ fontSize: '14px', color: '#9ca3af' }}>
-            点击上方"上传课件"按钮添加课件
+            {t('clickUploadCourseware')}
           </div>
         </div>
       ) : (
@@ -2017,8 +2024,8 @@ const CoursewareManagement = ({ onOpenEditor }) => {
               )}
 
               <div style={{ display: 'flex', gap: '12px', fontSize: '13px', color: '#9ca3af', marginBottom: '12px' }}>
-                <span>👁️ {item.viewCount} 次查看</span>
-                <span>⬇️ {item.downloadCount} 次下载</span>
+                <span>{interpolate(t('viewsCount'), { count: item.viewCount })}</span>
+                <span>{interpolate(t('downloadsCount'), { count: item.downloadCount })}</span>
               </div>
 
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
@@ -2041,7 +2048,7 @@ const CoursewareManagement = ({ onOpenEditor }) => {
                       justifyContent: 'center',
                       gap: '4px'
                     }}>
-                    <Eye size={12} /> 查看
+                    <Eye size={12} /> {t('viewFile')}
                   </button>
                 )}
                 
@@ -2066,9 +2073,9 @@ const CoursewareManagement = ({ onOpenEditor }) => {
                         justifyContent: 'center',
                         gap: '4px'
                       }}
-                      title="为课件添加知识点锚点"
+                      title={t('addKnowledgeAnchors')}
                     >
-                      <Anchor size={12} /> 锚点
+                      <Anchor size={12} /> {t('anchors')}
                     </button>
                     <button
                       onClick={() => handleStartPresentation(item)}
@@ -2116,7 +2123,7 @@ const CoursewareManagement = ({ onOpenEditor }) => {
                     justifyContent: 'center',
                     gap: '4px'
                   }}>
-                  <Download size={12} /> 下载
+                  <Download size={12} /> {t('download')}
                 </a>
                 <button
                   onClick={() => handleDelete(item.id)}
@@ -2166,12 +2173,12 @@ const CoursewareManagement = ({ onOpenEditor }) => {
           }}
           onClick={(e) => e.stopPropagation()}>
             <h3 style={{ margin: '0 0 20px', fontSize: '20px', fontWeight: '600' }}>
-              上传课件
+              {t('uploadCoursewareTitle')}
             </h3>
 
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '14px' }}>
-                课件标题 <span style={{ color: '#ef4444' }}>*</span>
+                {t('coursewareTitleRequired')}
               </label>
               <input
                 type="text"
@@ -2192,12 +2199,12 @@ const CoursewareManagement = ({ onOpenEditor }) => {
 
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '14px' }}>
-                课件描述
+                {t('coursewareDescriptionLabel')}
               </label>
               <textarea
                 value={uploadForm.description}
                 onChange={(e) => setUploadForm({ ...uploadForm, description: e.target.value })}
-                placeholder="简要描述课件内容..."
+                placeholder={t('describeCourseware')}
                 rows={3}
                 style={{
                   width: '100%',
@@ -2215,7 +2222,7 @@ const CoursewareManagement = ({ onOpenEditor }) => {
 
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '14px' }}>
-                课件分类
+                {t('coursewareCategoryLabel')}
               </label>
               <select
                 value={uploadForm.category}
@@ -2239,7 +2246,7 @@ const CoursewareManagement = ({ onOpenEditor }) => {
 
             <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '14px' }}>
-                选择文件 <span style={{ color: '#ef4444' }}>*</span>
+                {t('selectFileRequired')}
               </label>
               <input
                 type="file"
@@ -2255,7 +2262,7 @@ const CoursewareManagement = ({ onOpenEditor }) => {
                 }}
               />
               <div style={{ fontSize: '12px', color: '#9ca3af', marginTop: '4px' }}>
-                支持 PDF、PPT、PPTX、DOC、DOCX 格式，最大50MB
+                {t('supportedFormats')}
               </div>
               {uploadForm.file && (
                 <div style={{ marginTop: '8px', fontSize: '14px', color: '#667eea' }}>
@@ -2341,6 +2348,7 @@ const CoursewareManagement = ({ onOpenEditor }) => {
 
 // 在线答疑管理组件
 const QAManagement = ({ students }) => {
+  const { t } = useLanguage();
   const [questions, setQuestions] = useState([]);
   const [filter, setFilter] = useState('all'); // all, unanswered, answered
   const [replyingTo, setReplyingTo] = useState(null);
@@ -2391,7 +2399,7 @@ const QAManagement = ({ students }) => {
 
   const handleReply = async (questionId) => {
     if (!replyText.trim()) {
-      alert('请输入回复内容');
+      alert(t('enterReplyContent'));
       return;
     }
 
@@ -2474,7 +2482,7 @@ const QAManagement = ({ students }) => {
             fontWeight: '500',
             transition: 'all 0.3s'
           }}>
-          待回复 ({questions.filter(q => !q.answer).length})
+          {t('unanswered')} ({questions.filter(q => !q.answer).length})
         </button>
         <button 
           onClick={() => setFilter('answered')}
@@ -2489,7 +2497,7 @@ const QAManagement = ({ students }) => {
             fontWeight: '500',
             transition: 'all 0.3s'
           }}>
-          已回复 ({questions.filter(q => q.answer).length})
+          {t('answered')} ({questions.filter(q => q.answer).length})
         </button>
       </div>
 
@@ -2502,9 +2510,9 @@ const QAManagement = ({ students }) => {
         }}>
           <MessageCircle size={64} color="#d1d5db" style={{ marginBottom: '16px' }} />
           <div style={{ fontSize: '18px', fontWeight: '600', color: '#6b7280', marginBottom: '8px' }}>
-            {filter === 'all' && '暂无学生提问'}
-            {filter === 'answered' && '暂无已回复问题'}
-            {filter === 'unanswered' && '暂无待回复问题'}
+            {filter === 'all' && t('noStudentQuestions')}
+            {filter === 'answered' && t('noAnsweredQuestions')}
+            {filter === 'unanswered' && t('noUnansweredQuestions')}
           </div>
         </div>
       ) : (
@@ -2551,7 +2559,7 @@ const QAManagement = ({ students }) => {
                       fontSize: '12px',
                       fontWeight: '500'
                     }}>
-                      ✓ 已回复
+                      ✓ {t('answered')}
                     </span>
                   ) : (
                     <span style={{
@@ -2562,7 +2570,7 @@ const QAManagement = ({ students }) => {
                       fontSize: '12px',
                       fontWeight: '500'
                     }}>
-                      ⏳ 待回复
+                      ⏳ {t('unanswered')}
                     </span>
                   )}
                 </div>
@@ -2576,7 +2584,7 @@ const QAManagement = ({ students }) => {
                   borderLeft: '3px solid #667eea'
                 }}>
                   <div style={{ fontSize: '13px', fontWeight: '500', color: '#667eea', marginBottom: '8px' }}>
-                    学生提问：
+                    {t('studentQuestion')}
                   </div>
                   <div style={{ color: '#374151', lineHeight: 1.6, fontSize: '15px' }}>
                     {q.question}
@@ -2643,7 +2651,7 @@ const QAManagement = ({ students }) => {
                           fontSize: '14px',
                           fontWeight: '500'
                         }}>
-                        取消
+                        {t('cancel')}
                       </button>
                       <button
                         onClick={() => handleReply(q.id)}
@@ -2680,7 +2688,7 @@ const QAManagement = ({ students }) => {
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.background = '#15803d'}
                     onMouseLeave={(e) => e.currentTarget.style.background = '#16a34a'}>
-                    <MessageCircle size={16} /> 回复学生
+                    <MessageCircle size={16} /> {t('replyStudent')}
                   </button>
                 )}
               </div>
@@ -2694,13 +2702,14 @@ const QAManagement = ({ students }) => {
 
 // 作业批改组件
 const SubmissionReview = ({ submissions, students, assignments, onOpenEditor, onScoreUpdate }) => {
+  const { t } = useLanguage();
   const [scoringSubmission, setScoringSubmission] = useState(null);
   const [scoreForm, setScoreForm] = useState({ score: '', comment: '' });
   const [filter, setFilter] = useState('all'); // all, reviewed, unreviewed
 
   const handleScoreSubmit = async () => {
     if (!scoreForm.score || scoreForm.score < 0 || scoreForm.score > 100) {
-      alert('请输入有效的分数（0-100）');
+      alert(t('enterValidScore'));
       return;
     }
 
@@ -2718,11 +2727,11 @@ const SubmissionReview = ({ submissions, students, assignments, onOpenEditor, on
         onScoreUpdate(scoringSubmission.id, parseInt(scoreForm.score), scoreForm.comment);
         setScoringSubmission(null);
         setScoreForm({ score: '', comment: '' });
-        alert('✅ 批改成功！');
+        alert(t('gradingSuccess'));
       }
     } catch (error) {
-      console.error('批改失败:', error);
-      alert('❌ 批改失败，请重试');
+      console.error(t('gradingFailedError'), error);
+      alert(t('gradingFailed'));
     }
   };
 
@@ -2752,13 +2761,13 @@ const SubmissionReview = ({ submissions, students, assignments, onOpenEditor, on
       return {
         bg: '#f0fdf4',
         color: '#16a34a',
-        text: '✓ 已批改'
+        text: '✓ ' + t('reviewed')
       };
     }
     return {
       bg: '#fef3c7',
       color: '#f59e0b',
-      text: '⏳ 待批改'
+      text: '⏳ ' + t('unanswered')
     };
   };
 
@@ -2790,7 +2799,7 @@ const SubmissionReview = ({ submissions, students, assignments, onOpenEditor, on
             cursor: 'pointer'
           }}
         >
-          待批改 ({submissions.filter(s => !s.reviewed).length})
+          {t('unanswered')} ({submissions.filter(s => !s.reviewed).length})
         </button>
         <button 
           onClick={() => setFilter('reviewed')}
@@ -2803,7 +2812,7 @@ const SubmissionReview = ({ submissions, students, assignments, onOpenEditor, on
             cursor: 'pointer'
           }}
         >
-          已批改 ({submissions.filter(s => s.reviewed).length})
+          {t('reviewed')} ({submissions.filter(s => s.reviewed).length})
         </button>
       </div>
 
@@ -2815,14 +2824,14 @@ const SubmissionReview = ({ submissions, students, assignments, onOpenEditor, on
         }}>
           <CheckCircle size={64} color="#d1d5db" style={{ marginBottom: '16px' }} />
           <div style={{ fontSize: '18px', fontWeight: '600', color: '#6b7280', marginBottom: '8px' }}>
-            {filter === 'all' && '暂无学生提交'}
-            {filter === 'reviewed' && '暂无已批改作业'}
-            {filter === 'unreviewed' && '暂无待批改作业'}
+            {filter === 'all' && t('noSubmissions')}
+            {filter === 'reviewed' && t('noReviewedSubmissions')}
+            {filter === 'unreviewed' && t('noUnreviewedSubmissions')}
           </div>
           <div style={{ fontSize: '14px', color: '#9ca3af' }}>
-            {filter === 'all' && '学生提交作业后会显示在这里'}
-            {filter === 'reviewed' && '已批改的作业会显示在这里'}
-            {filter === 'unreviewed' && '等待批改的作业会显示在这里'}
+            {filter === 'all' && t('submissionsWillShowHere')}
+            {filter === 'reviewed' && t('reviewedWillShowHere')}
+            {filter === 'unreviewed' && t('unreviewedWillShowHere')}
           </div>
         </div>
       ) : (
@@ -2831,11 +2840,11 @@ const SubmissionReview = ({ submissions, students, assignments, onOpenEditor, on
             <tr style={{background:'#f9fafb', borderBottom: '2px solid #e5e7eb'}}>
               <th style={{padding:'14px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#6b7280'}}>学生</th>
               <th style={{padding:'14px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#6b7280'}}>班级</th>
-              <th style={{padding:'14px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#6b7280'}}>作业</th>
-              <th style={{padding:'14px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#6b7280'}}>提交时间</th>
-              <th style={{padding:'14px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#6b7280'}}>分数</th>
-              <th style={{padding:'14px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#6b7280'}}>状态</th>
-              <th style={{padding:'14px', textAlign: 'right', fontSize: '13px', fontWeight: '600', color: '#6b7280'}}>操作</th>
+              <th style={{padding:'14px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#6b7280'}}>{t('assignment')}</th>
+              <th style={{padding:'14px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#6b7280'}}>{t('submissionTime')}</th>
+              <th style={{padding:'14px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#6b7280'}}>{t('score')}</th>
+              <th style={{padding:'14px', textAlign: 'left', fontSize: '13px', fontWeight: '600', color: '#6b7280'}}>{t('status')}</th>
+              <th style={{padding:'14px', textAlign: 'right', fontSize: '13px', fontWeight: '600', color: '#6b7280'}}>{t('operations')}</th>
             </tr>
           </thead>
           <tbody>
@@ -2921,7 +2930,7 @@ const SubmissionReview = ({ submissions, students, assignments, onOpenEditor, on
                         </span>
                       </div>
                     ) : (
-                      <span style={{color:'#9ca3af', fontSize:'13px'}}>未批改</span>
+                      <span style={{color:'#9ca3af', fontSize:'13px'}}>{t('unreviewed')}</span>
                     )}
                   </td>
                   <td style={{padding:'14px'}}>
@@ -2960,7 +2969,7 @@ const SubmissionReview = ({ submissions, students, assignments, onOpenEditor, on
                         }}
                         onMouseEnter={(e) => e.currentTarget.style.background = '#bfdbfe'}
                         onMouseLeave={(e) => e.currentTarget.style.background = '#dbeafe'}>
-                        <Play size={14}/> 查看代码
+                        <Play size={14}/> {t('viewCode')}
                       </button>
                       <button 
                         onClick={() => openScoreModal(sub)}
@@ -2985,7 +2994,7 @@ const SubmissionReview = ({ submissions, students, assignments, onOpenEditor, on
                         onMouseLeave={(e) => {
                           e.currentTarget.style.background = sub.reviewed ? '#f3f4f6' : '#dcfce7';
                         }}>
-                        {sub.reviewed ? '修改分数' : '打分'}
+                        {sub.reviewed ? t('modifyScore') : t('gradeScore')}
                       </button>
                     </div>
                   </td>
@@ -3019,7 +3028,7 @@ const SubmissionReview = ({ submissions, students, assignments, onOpenEditor, on
             overflow: 'auto'
           }}>
             <h3 style={{marginTop:0, marginBottom:'20px', fontSize:'20px'}}>
-              批改作业
+              {t('gradeAssignment')}
             </h3>
 
             <div style={{marginBottom:'16px', padding:'12px', background:'#f9fafb', borderRadius:'8px'}}>
@@ -3038,7 +3047,7 @@ const SubmissionReview = ({ submissions, students, assignments, onOpenEditor, on
 
             <div style={{marginBottom:'20px'}}>
               <label style={{display:'block', marginBottom:'8px', fontWeight:'500', fontSize:'14px'}}>
-                分数 (0-100)
+                {t('scoreRange')}
               </label>
               <input
                 type="number"
@@ -3046,7 +3055,7 @@ const SubmissionReview = ({ submissions, students, assignments, onOpenEditor, on
                 max="100"
                 value={scoreForm.score}
                 onChange={(e) => setScoreForm({...scoreForm, score: e.target.value})}
-                placeholder="请输入分数"
+                placeholder={t('enterScore')}
                 style={{
                   width:'100%',
                   padding:'12px',
@@ -3063,12 +3072,12 @@ const SubmissionReview = ({ submissions, students, assignments, onOpenEditor, on
 
             <div style={{marginBottom:'24px'}}>
               <label style={{display:'block', marginBottom:'8px', fontWeight:'500', fontSize:'14px'}}>
-                评语（可选）
+                {t('commentOptional')}
               </label>
               <textarea
                 value={scoreForm.comment}
                 onChange={(e) => setScoreForm({...scoreForm, comment: e.target.value})}
-                placeholder="写下你的评语..."
+                placeholder={t('writeComment')}
                 rows={4}
                 style={{
                   width:'100%',
@@ -3117,7 +3126,7 @@ const SubmissionReview = ({ submissions, students, assignments, onOpenEditor, on
                   fontWeight:'500'
                 }}
               >
-                提交批改
+                {t('submitGrading')}
               </button>
             </div>
           </div>
@@ -3129,11 +3138,12 @@ const SubmissionReview = ({ submissions, students, assignments, onOpenEditor, on
 
 // 作业布置组件（卡片式风格）
 const AssignmentManager = ({ assignments, setAssignments, repo, students }) => {
+  const { t } = useLanguage();
   const [showModal, setShowModal] = useState(false);
   const [newAssign, setNewAssign] = useState({ title: '', requirements: '', deadline: '', linkedCodeId: '', targetClass: '所有班级' });
 
   const handleCreate = async () => {
-    if(!newAssign.title) return alert('请输入标题');
+    if(!newAssign.title) return alert(t('enterTitleRequired2'));
     
     try {
       const response = await fetch('http://localhost:5000/api/assignments', {
@@ -3172,7 +3182,7 @@ const AssignmentManager = ({ assignments, setAssignments, repo, students }) => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div>
           <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '600', color: '#1a1a2e' }}>
-            作业管理
+            {t('assignmentManagementTitle')}
           </h3>
           <p style={{ margin: '4px 0 0', fontSize: '14px', color: '#6b7280' }}>
             共 {assignments.length} 个作业
@@ -3247,7 +3257,7 @@ const AssignmentManager = ({ assignments, setAssignments, repo, students }) => {
                   fontSize: '12px',
                   fontWeight: '500'
                 }}>
-                  {isExpired ? '已截止' : '进行中'}
+                  {isExpired ? t('expired') : t('inProgress')}
                 </div>
 
                 {/* 作业标题 */}
@@ -3307,7 +3317,7 @@ const AssignmentManager = ({ assignments, setAssignments, repo, students }) => {
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button
                     onClick={async () => {
-                      if(window.confirm('确定删除该作业吗？')) {
+                      if(window.confirm(t('confirmDeleteAssignment'))) {
                         try {
                           const response = await fetch(`http://localhost:5000/api/assignments/${a.id}`, {
                             method: 'DELETE'
@@ -3316,7 +3326,7 @@ const AssignmentManager = ({ assignments, setAssignments, repo, students }) => {
                             setAssignments(assignments.filter(x=>x.id!==a.id));
                           }
                         } catch (error) {
-                          console.error('删除作业失败:', error);
+                          console.error(t('deleteAssignmentFailed'), error);
                           alert('删除失败，请重试');
                         }
                       }
@@ -3388,7 +3398,7 @@ const AssignmentManager = ({ assignments, setAssignments, repo, students }) => {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 <div>
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '14px' }}>
-                    作业标题 <span style={{ color: '#ff4d4f' }}>*</span>
+                    {t('assignmentTitleRequired')}
                   </label>
                   <input
                     value={newAssign.title}
@@ -3436,7 +3446,7 @@ const AssignmentManager = ({ assignments, setAssignments, repo, students }) => {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                   <div>
                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '14px' }}>
-                      截止时间 <span style={{ color: '#ff4d4f' }}>*</span>
+                      {t('deadlineRequired')}
                     </label>
                     <input
                       type="date"
@@ -3541,7 +3551,7 @@ const AssignmentManager = ({ assignments, setAssignments, repo, students }) => {
                   fontWeight: '600',
                   cursor: 'pointer'
                 }}>
-                发布作业
+                {t('publishAssignment')}
               </button>
             </div>
           </div>
@@ -3553,6 +3563,7 @@ const AssignmentManager = ({ assignments, setAssignments, repo, students }) => {
 
 // 教师仪表盘主组件
 function TeacherDashboard({ data, setData, onOpenEditor, onLogout, user }) {
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('assignments');
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -3566,12 +3577,12 @@ function TeacherDashboard({ data, setData, onOpenEditor, onLogout, user }) {
   const [profileSaving, setProfileSaving] = useState(false);
 
   const tabLabels = {
-    students: '学生名单管理',
-    repository: '代码库管理',
-    assignments: '作业布置',
-    submissions: '学生作业批阅',
-    courseware: '课件管理',
-    qa: '在线答疑管理'
+    students: t('studentManagement'),
+    repository: t('codeRepository'),
+    assignments: t('assignmentManagement'),
+    submissions: t('submissionReview'),
+    courseware: t('coursewareManagement'),
+    qa: t('qaManagement')
   };
 
   return (
@@ -3584,12 +3595,12 @@ function TeacherDashboard({ data, setData, onOpenEditor, onLogout, user }) {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
           {[
-            { id: 'students', icon: <Users size={18}/>, label: '学生名单' },
-            { id: 'repository', icon: <Database size={18}/>, label: '代码库管理' },
-            { id: 'assignments', icon: <BookOpen size={18}/>, label: '作业布置' },
-            { id: 'submissions', icon: <CheckCircle size={18}/>, label: '作业批阅' },
-            { id: 'courseware', icon: <FileText size={18}/>, label: '课件管理' },
-            { id: 'qa', icon: <MessageCircle size={18}/>, label: '在线答疑' },
+            { id: 'students', icon: <Users size={18}/>, label: t('studentList') },
+            { id: 'repository', icon: <Database size={18}/>, label: t('codeRepository') },
+            { id: 'assignments', icon: <BookOpen size={18}/>, label: t('assignmentManagement') },
+            { id: 'submissions', icon: <CheckCircle size={18}/>, label: t('submissionReview') },
+            { id: 'courseware', icon: <FileText size={18}/>, label: t('coursewareManagement') },
+            { id: 'qa', icon: <MessageCircle size={18}/>, label: t('qaManagement') },
           ].map(item => (
             <div 
               key={item.id} 
@@ -3620,7 +3631,7 @@ function TeacherDashboard({ data, setData, onOpenEditor, onLogout, user }) {
         <button onClick={onLogout} style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer', padding:'10px', transition: 'color 0.3s' }}
           onMouseEnter={(e) => e.currentTarget.style.color = '#f3f4f6'}
           onMouseLeave={(e) => e.currentTarget.style.color = '#9ca3af'}>
-          <LogOutIcon size={18} /> 退出登录
+          <LogOutIcon size={18} /> {t('logout')}
         </button>
       </div>
 
@@ -3643,21 +3654,26 @@ function TeacherDashboard({ data, setData, onOpenEditor, onLogout, user }) {
           </div>
 
           {/* 右侧用户菜单 */}
-          <div style={{ position: 'relative' }}>
-            <div
-              onClick={() => setShowUserMenu(!showUserMenu)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '8px 12px',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                transition: 'background 0.3s',
-                background: showUserMenu ? '#f3f4f6' : 'transparent'
-              }}
-              onMouseEnter={(e) => !showUserMenu && (e.currentTarget.style.background = '#f9fafb')}
-              onMouseLeave={(e) => !showUserMenu && (e.currentTarget.style.background = 'transparent')}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            {/* 语言切换按钮 */}
+            <LanguageSwitch />
+            
+            <div style={{ position: 'relative' }}>
+              <div
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  transition: 'background 0.3s',
+                  background: showUserMenu ? '#f3f4f6' : 'transparent'
+                }}
+                onMouseEnter={(e) => !showUserMenu && (e.currentTarget.style.background = '#f9fafb')}
+                onMouseLeave={(e) => !showUserMenu && (e.currentTarget.style.background = 'transparent')}
+              ></div>
               <div style={{
                 width: '36px',
                 height: '36px',
@@ -3720,7 +3736,7 @@ function TeacherDashboard({ data, setData, onOpenEditor, onLogout, user }) {
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
                     onMouseLeave={(e) => e.currentTarget.style.background = 'none'}>
-                    <User size={16} /> 个人资料
+                    <User size={16} /> {t('profile')}
                   </button>
                   <button
                     style={{
@@ -3739,7 +3755,7 @@ function TeacherDashboard({ data, setData, onOpenEditor, onLogout, user }) {
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
                     onMouseLeave={(e) => e.currentTarget.style.background = 'none'}>
-                    <Settings size={16} /> 系统设置
+                    <Settings size={16} /> {t('settings')}
                   </button>
                   <div style={{ height: '1px', background: '#e5e7eb', margin: '8px 0' }} />
                   <button
@@ -3760,7 +3776,7 @@ function TeacherDashboard({ data, setData, onOpenEditor, onLogout, user }) {
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.background = '#fee2e2'}
                     onMouseLeave={(e) => e.currentTarget.style.background = 'none'}>
-                    <LogOutIcon size={16} /> 退出登录
+                    <LogOutIcon size={16} /> {t('logout')}
                   </button>
                 </div>
               </div>
@@ -3843,14 +3859,14 @@ function TeacherDashboard({ data, setData, onOpenEditor, onLogout, user }) {
                 padding: '24px', borderBottom: '1px solid #e5e7eb'
               }}>
                 <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '600', color: '#1a1a2e' }}>
-                  个人资料设置
+                  {t('profileSettings')}
                 </h2>
               </div>
 
               <div style={{ padding: '24px' }}>
                 <div style={{ marginBottom: '20px' }}>
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '14px' }}>
-                    用户名
+                    {t('username')}
                   </label>
                   <input
                     type="text"
@@ -3863,19 +3879,19 @@ function TeacherDashboard({ data, setData, onOpenEditor, onLogout, user }) {
                     }}
                   />
                   <div style={{ fontSize: '12px', color: '#9ca3af', marginTop: '4px' }}>
-                    用户名不可修改
+                    {t('usernameCannotModify')}
                   </div>
                 </div>
 
                 <div style={{ marginBottom: '20px' }}>
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '14px' }}>
-                    邮箱
+                    {t('email')}
                   </label>
                   <input
                     type="email"
                     value={profileForm.email}
                     onChange={(e) => setProfileForm({...profileForm, email: e.target.value})}
-                    placeholder="your@email.com"
+                    placeholder={t('enterEmail')}
                     style={{
                       width: '100%', padding: '10px', border: '2px solid #e5e7eb',
                       borderRadius: '8px', fontSize: '14px', outline: 'none',
@@ -3888,7 +3904,7 @@ function TeacherDashboard({ data, setData, onOpenEditor, onLogout, user }) {
 
                 <div style={{ marginBottom: '20px' }}>
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '14px' }}>
-                    手机号
+                    {t('phoneNumber')}
                   </label>
                   <input
                     type="tel"
@@ -3907,13 +3923,13 @@ function TeacherDashboard({ data, setData, onOpenEditor, onLogout, user }) {
 
                 <div style={{ marginBottom: '20px' }}>
                   <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '14px' }}>
-                    新密码（不修改请留空）
+                    {t('newPasswordOptional')}
                   </label>
                   <input
                     type="password"
                     value={profileForm.password}
                     onChange={(e) => setProfileForm({...profileForm, password: e.target.value})}
-                    placeholder="至少6位"
+                    placeholder={t('atLeast6Characters')}
                     style={{
                       width: '100%', padding: '10px', border: '2px solid #e5e7eb',
                       borderRadius: '8px', fontSize: '14px', outline: 'none',
@@ -3927,13 +3943,13 @@ function TeacherDashboard({ data, setData, onOpenEditor, onLogout, user }) {
                 {profileForm.password && (
                   <div style={{ marginBottom: '20px' }}>
                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '14px' }}>
-                      确认新密码
+                      {t('confirmNewPassword')}
                     </label>
                     <input
                       type="password"
                       value={profileForm.confirmPassword}
                       onChange={(e) => setProfileForm({...profileForm, confirmPassword: e.target.value})}
-                      placeholder="再次输入新密码"
+                      placeholder={t('enterNewPasswordAgain')}
                       style={{
                         width: '100%', padding: '10px', border: '2px solid #e5e7eb',
                         borderRadius: '8px', fontSize: '14px', outline: 'none',
@@ -3959,7 +3975,7 @@ function TeacherDashboard({ data, setData, onOpenEditor, onLogout, user }) {
                     cursor: profileSaving ? 'not-allowed' : 'pointer',
                     fontSize: '14px', fontWeight: '500', color: '#6b7280'
                   }}>
-                  取消
+                  {t('cancel')}
                 </button>
                 <button
                   onClick={async () => {
@@ -4007,12 +4023,15 @@ function TeacherDashboard({ data, setData, onOpenEditor, onLogout, user }) {
                     cursor: profileSaving ? 'not-allowed' : 'pointer',
                     fontSize: '14px', fontWeight: '500'
                   }}>
-                  {profileSaving ? '保存中...' : '保存修改'}
+                  {profileSaving ? t('saving') : t('saveChanges')}
                 </button>
               </div>
             </div>
           </div>
         )}
+
+        {/* AI 助手 */}
+        <AIAssistant userRole="teacher" userName={user.name} />
       </div>
     </div>
   );

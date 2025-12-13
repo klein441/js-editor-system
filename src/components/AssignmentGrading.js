@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, User, Clock, FileText, Star, MessageSquare, CheckCircle, XCircle } from 'lucide-react';
+import { useLanguage } from '../i18n/LanguageContext';
+import { interpolate } from '../i18n/translations';
 
 const AssignmentGrading = ({ assignmentId, onBack }) => {
+  const { t } = useLanguage();
   const [submissions, setSubmissions] = useState([]);
   const [selectedSubmission, setSelectedSubmission] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -336,7 +339,7 @@ const AssignmentGrading = ({ assignmentId, onBack }) => {
                 <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
                   <div style={{ flex: '0 0 120px' }}>
                     <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: '500' }}>
-                      分数 (0-100)
+                      {t('scoreRange')}
                     </label>
                     <input
                       type="number"
@@ -357,12 +360,12 @@ const AssignmentGrading = ({ assignmentId, onBack }) => {
                   
                   <div style={{ flex: 1 }}>
                     <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: '500' }}>
-                      评语
+                      {t('feedback')}
                     </label>
                     <textarea
                       value={feedback}
                       onChange={(e) => setFeedback(e.target.value)}
-                      placeholder="请输入评语..."
+                      placeholder={t('writeComment')}
                       rows={3}
                       style={{
                         width: '100%',
@@ -430,11 +433,11 @@ const AssignmentGrading = ({ assignmentId, onBack }) => {
                     borderRadius: '8px'
                   }}>
                     <div style={{ fontSize: '14px', fontWeight: '500', marginBottom: '4px' }}>
-                      当前评分: {selectedSubmission.score}分
+                      {interpolate(t('currentGrade'), { score: selectedSubmission.score })}
                     </div>
                     {selectedSubmission.feedback && (
                       <div style={{ fontSize: '14px', color: '#6b7280' }}>
-                        评语: {selectedSubmission.feedback}
+                        {interpolate(t('comment'), { comment: selectedSubmission.feedback })}
                       </div>
                     )}
                   </div>

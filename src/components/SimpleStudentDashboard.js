@@ -80,7 +80,7 @@ const SimpleStudentDashboard = ({ user, data, onOpenEditor, onLogout }) => {
           }}>
             <h3>学习进度</h3>
             <p>本周学习时间: 8.5小时</p>
-            <p>平均分数: 85分</p>
+            <p>{t('averageScore')}: 85{t('score')}</p>
           </div>
         </div>
 
@@ -105,7 +105,7 @@ const SimpleStudentDashboard = ({ user, data, onOpenEditor, onLogout }) => {
                 }}>
                   <div>
                     <h4>{assignment.title}</h4>
-                    <p>截止时间: {assignment.deadline}</p>
+                    <p>{t('deadline')}: {assignment.deadline}</p>
                   </div>
                   <button
                     onClick={() => onOpenEditor && onOpenEditor({
