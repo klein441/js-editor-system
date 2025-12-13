@@ -1,0 +1,80 @@
+/* 基础样式重置与全局设置 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+/* 页面容器样式 */
+body {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* 标题样式 */
+h2 {
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-weight: 600;
+}
+
+/* SVG 图表容器样式 */
+svg {
+    width: 100%;
+    max-width: 500px;
+    height: 300px;
+    margin: 0 auto;
+    display: block;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 条形图样式 */
+.bar {
+    fill: steelblue;
+    transition: all 0.3s ease;
+    rx: 2; /* 轻微圆角 */
+    ry: 2;
+}
+
+.bar:hover {
+    fill: orange;
+    transform: translateY(-2px);
+}
+
+/* 数据标签样式 */
+.label {
+    font-size: 12px;
+    text-anchor: middle;
+    fill: #333;
+    font-weight: 500;
+}
+
+/* 坐标轴样式优化 */
+.x-axis text, .y-axis text {
+    font-size: 11px;
+    fill: #666;
+}
+
+.x-axis path, .y-axis path {
+    stroke: #ddd;
+}
+
+.x-axis line, .y-axis line {
+    stroke: #eee;
+}
+
+/* 提示文本样式 */
+p {
+    text-align: center;
+    margin-top: 1rem;
+    color: #666;
+    font-size: 0.9rem;
+}

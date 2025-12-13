@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D3.js 加载 CSV 和 JSON 数据</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <h2>月度销售额 (数据来自 CSV 文件)</h2>
+    <svg id="csvChart" width="500" height="300"></svg>
+    
+    <h2>季度利润统计 (数据来自 JSON 文件)</h2>
+    <svg id="jsonChart" width="500" height="300"></svg>
+    
+    <p>提示：打开浏览器开发者工具的 Console 面板可以看到加载的数据。</p>
+
+    <script>
+        // 通用图表初始化函数
+        function initChart(svgId) {
+            const svg = d3.select(`#${svgId}`);
+            const width = +svg.attr("width");
+            const height = +svg.attr("height");
+            const margin = {top: 20, right: 20, bottom: 30, left: 40};
+            const chartWidth = width - margin.left - margin.right;
+            const chartHeight = height - margin.top - margin.bottom;
+
+            // 创建图表分组
+            const chartGroup = svg.append("g")
+                .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+            // 定义比例尺和坐标轴
+            const xScale = d3.scaleBand().range([0, chartWidth]).padding(0.1);
+            const yScale = d3.scaleLinear().range([chartHeight, 0]);
+            const xAxis = d3.axisBottom(xScale);
+            const yAxis = d3.axisLeft(yScale);
+
+            // 添加坐标轴容器
+            chartGroup.append("g")
+                .attr("class", "x-axis")
+                .attr("transform", `translate(0, ${chartHeight})`);
+
+            chartGroup.append("g")
+                .attr("class", "y-axis");
+
+            return { svg, chartGroup, xScale, yScale, xAxis, yAxis, chartWidth, chartHeight };
+        }
+
+        // 更新图表函数
+        function updateChart(chart, data, valueKey) {
+            // 转换数值类型
+            data.forEach(d => {
+                d[valueKey] = +d[valueKey];
+            });
+
+            // 设置比例尺定义域
+            chart.xScale.domain(data.map(d => d.name));
+            chart.yScale.domain([0, d3.max(data, d => d[valueKey])]);
+
+            // 更新坐标轴
+            chart.chartGroup.select(".x-axis").call(chart.xAxis);
+            chart.chartGroup.select(".y-axis").call(chart.yAxis);
+
+            // 处理条形
+            const bars = chart.chartGroup.selectAll(".bar").data(data, d => d.name);
+            bars.exit().remove();
+            const newBars = bars.enter().append("rect").attr("class", "bar");
+            newBars.merge(bars)
+                .attr("x", d => chart.xScale(d.name))
+                .attr("y", d => chart.yScale(d[valueKey]))
+                .attr("width", chart.xScale.bandwidth())
+                .attr("height", d => chart.chartHeight - chart.yScale(d[valueKey]));
+
+            // 处理标签
+            const labels = chart.chartGroup.selectAll(".label").data(data, d => d.name);
+            labels.exit().remove();
+            const newLabels = labels.enter().append("text").attr("class", "label");
+            newLabels.merge(labels)
+                .attr("x", d => chart.xScale(d.name) + chart.xScale.bandwidth() / 2)
+                .attr("y", d => chart.yScale(d[valueKey]) - 5)
+                .text(d => d[valueKey]);
+        }
+
+        // 初始化两个图表
+        const csvChart = initChart("csvChart");
+        const jsonChart = initChart("jsonChart");
+
+        // 加载 CSV 数据
+        d3.csv("sales-data.csv")
+            .then(function(data) {
+                console.log("从 CSV 加载的原始数据:", data);
+                // 将 month 字段重命名为 name 以匹配图表函数
+                data.forEach(d => {
+                    d.name = d.month;
+                });
+                updateChart(csvChart, data, "sales");
+            })
+            .catch(function(error) {
+                console.error("加载 CSV 文件时出错:", error);
+                alert("加载CSV数据失败，请检查文件路径或网络连接。");
+            });
+
+        // 加载 JSON 数据
+        d3.json("profit-data.json")
+            .then(function(data) {
+                console.log("从 JSON 加载的原始数据:", data);
+                updateChart(jsonChart, data, "profit");
+            })
+            .catch(function(error) {
+                console.error("加载 JSON 文件时出错:", error);
+                alert("加载JSON数据失败，请检查文件路径或网络连接。");
+            });
+
+    </script>
+
+</body>
+</html>
