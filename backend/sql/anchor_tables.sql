@@ -17,9 +17,9 @@ CREATE TABLE IF NOT EXISTS knowledge_anchors (
 CREATE TABLE IF NOT EXISTS anchor_resources (
   id INT PRIMARY KEY AUTO_INCREMENT,
   anchor_id INT NOT NULL,
-  resource_type ENUM('video', 'code', 'syntax') NOT NULL,
+  resource_type ENUM('video', 'code', 'syntax', 'editor') NOT NULL,
   resource_url VARCHAR(500), -- B站链接或内部视频路径
-  resource_content TEXT, -- 代码内容或语法说明
+  resource_content TEXT, -- 代码内容、语法说明或编译器初始模板
   title VARCHAR(200) NOT NULL,
   description TEXT,
   file_path VARCHAR(500), -- 上传的视频文件路径

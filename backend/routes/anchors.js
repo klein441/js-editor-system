@@ -318,6 +318,38 @@ router.post('/anchors/:anchorId/resources/syntax', async (req, res) => {
   }
 });
 
+// 为锚点添加编译系统资源
+router.post('/anchors/:anchorId/resources/editor', async (req, res) => {
+  try {
+    const { anchorId } = req.params;
+    const { title, description, resource_content } = req.body;
+    
+    if (!title) {
+      return res.status(400).json({ error: '标题为必填项' });
+    }
+    
+    const [result] = await pool.query(`
+      INSERT INTO anchor_resources 
+      (anchor_id, resource_type, resource_content, title, description)
+      VALUES (?, 'editor', ?, ?, ?)
+    `, [anchorId, resource_content || '', title, description || '']);
+    
+    const [newResource] = await pool.query(
+      'SELECT * FROM anchor_resources WHERE id = ?',
+      [result.insertId]
+    );
+    
+    res.json({
+      success: true,
+      resource: newResource[0],
+      message: '编译系统资源添加成功'
+    });
+  } catch (error) {
+    console.error('添加编译系统资源失败:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // 更新资源
 router.put('/resources/:resourceId', async (req, res) => {
   try {

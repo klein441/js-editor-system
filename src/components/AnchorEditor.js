@@ -33,6 +33,8 @@ const AnchorEditor = ({ coursewareId, slides, onClose }) => {
   const [selectedAnchorId, setSelectedAnchorId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [previewAnchor, setPreviewAnchor] = useState(null);
+  const [codeLibrary, setCodeLibrary] = useState([]);
+  const [selectedCodeSnippet, setSelectedCodeSnippet] = useState('');
   
   const slideRef = useRef(null);
 
@@ -71,6 +73,26 @@ const AnchorEditor = ({ coursewareId, slides, onClose }) => {
       console.error('加载锚点失败:', error);
     }
   };
+
+  // 加载代码库
+  const loadCodeLibrary = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/code-library');
+      if (response.ok) {
+        const data = await response.json();
+        setCodeLibrary(data);
+      }
+    } catch (error) {
+      console.error('加载代码库失败:', error);
+    }
+  };
+
+  // 当打开资源表单且选择编译系统类型时，加载代码库
+  useEffect(() => {
+    if (showResourceForm && resourceType === 'editor') {
+      loadCodeLibrary();
+    }
+  }, [showResourceForm, resourceType]);
 
   // 在幻灯片上点击添加锚点
   const handleSlideClick = (e) => {
@@ -536,6 +558,13 @@ const AnchorEditor = ({ coursewareId, slides, onClose }) => {
                       onClick={() => {
                         setSelectedAnchorId(anchor.id);
                         setShowResourceForm(true);
+                        setSelectedCodeSnippet(''); // 重置代码库选择
+                        setResourceForm({
+                          title: '',
+                          description: '',
+                          resource_content: '',
+                          resource_url: ''
+                        });
                       }}
                       style={{
                         padding: '4px 8px',
@@ -804,6 +833,7 @@ const AnchorEditor = ({ coursewareId, slides, onClose }) => {
                 <option value="video">视频资源</option>
                 <option value="code">代码示例</option>
                 <option value="syntax">语法说明</option>
+                <option value="editor">编译系统</option>
               </select>
             </div>
 
@@ -848,6 +878,94 @@ const AnchorEditor = ({ coursewareId, slides, onClose }) => {
                     border: '1px solid #ddd',
                     borderRadius: '4px',
                     fontSize: '14px'
+                  }}
+                />
+              </div>
+            )}
+
+            {resourceType === 'editor' && (
+              <div style={{ marginBottom: '10px' }}>
+                <div style={{
+                  padding: '15px',
+                  background: '#f0f9ff',
+                  border: '1px solid #0ea5e9',
+                  borderRadius: '8px',
+                  marginBottom: '10px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '24px' }}>💻</span>
+                    <span style={{ fontSize: '14px', fontWeight: '600', color: '#0369a1' }}>
+                      在线编译系统
+                    </span>
+                  </div>
+                  <p style={{ fontSize: '13px', color: '#0c4a6e', margin: 0 }}>
+                    点击此资源将打开JS在线编译器，学生可以直接在浏览器中编写和运行代码
+                  </p>
+                </div>
+
+                {/* 从代码库选择 */}
+                <div style={{ marginBottom: '10px' }}>
+                  <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>
+                    从代码库选择（可选）
+                  </label>
+                  <select
+                    value={selectedCodeSnippet}
+                    onChange={(e) => {
+                      const snippetId = e.target.value;
+                      setSelectedCodeSnippet(snippetId);
+                      
+                      if (snippetId) {
+                        const snippet = codeLibrary.find(item => item.id === parseInt(snippetId));
+                        if (snippet) {
+                          setResourceForm({
+                            ...resourceForm,
+                            title: snippet.title,
+                            description: snippet.description || '',
+                            resource_content: snippet.content
+                          });
+                        }
+                      }
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      fontSize: '14px',
+                      background: 'white'
+                    }}
+                  >
+                    <option value="">-- 选择代码库中的资源 --</option>
+                    {codeLibrary.map(item => (
+                      <option key={item.id} value={item.id}>
+                        {item.title} ({item.language})
+                      </option>
+                    ))}
+                  </select>
+                  <p style={{ fontSize: '12px', color: '#6b7280', margin: '4px 0 0' }}>
+                    选择后将自动填充标题、描述和代码内容
+                  </p>
+                </div>
+
+                <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>
+                  初始代码模板（可选）
+                </label>
+                <textarea
+                  value={resourceForm.resource_content}
+                  onChange={(e) => setResourceForm({
+                    ...resourceForm,
+                    resource_content: e.target.value
+                  })}
+                  placeholder="可以输入初始代码模板，或从代码库选择..."
+                  rows={6}
+                  style={{
+                    width: '100%',
+                    padding: '8px',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    fontSize: '14px',
+                    fontFamily: 'monospace',
+                    resize: 'vertical'
                   }}
                 />
               </div>

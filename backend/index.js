@@ -20,6 +20,10 @@ app.use('/api', anchorRoutes);
 const submissionRoutes = require('./routes/submissions');
 app.use('/api/submissions', submissionRoutes);
 
+// 引入可视化示例路由
+const visualizationExamplesRoutes = require('./routes/visualizationExamples');
+app.use('/api/visualization-examples', visualizationExamplesRoutes);
+
 // 静态文件服务 - 用于下载课件
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
