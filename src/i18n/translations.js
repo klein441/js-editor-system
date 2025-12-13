@@ -619,6 +619,9 @@ export const translations = {
     inProgress: '进行中',
     expired: '已截止',
     coursewareList: '课件列表',
+    allClasses: '全部班级',
+    selectClass: '选择班级',
+    classFilter: '班级筛选',
   },
   
   en: {
@@ -1240,6 +1243,9 @@ export const translations = {
     inProgress: 'In Progress',
     expired: 'Expired',
     coursewareList: 'Courseware List',
+    allClasses: 'All Classes',
+    selectClass: 'Select Class',
+    classFilter: 'Class Filter',
   }
 };
 

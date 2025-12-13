@@ -45,6 +45,7 @@ const StudentManager = ({ students, setStudents }) => {
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedClass, setSelectedClass] = useState(''); // 选中的班级
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -185,11 +186,20 @@ const StudentManager = ({ students, setStudents }) => {
     }
   };
 
-  const filteredStudents = students.filter(s => 
-    s.name.includes(searchQuery) || 
-    s.id.includes(searchQuery) || 
-    s.class.includes(searchQuery)
-  );
+  // 获取所有唯一的班级列表
+  const allClasses = [...new Set(students.map(s => s.class).filter(c => c))];
+  
+  // 筛选学生：先按班级筛选，再按搜索关键词筛选
+  const filteredStudents = students.filter(s => {
+    // 班级筛选
+    const classMatch = !selectedClass || s.class === selectedClass;
+    // 搜索关键词筛选
+    const searchMatch = !searchQuery || 
+      s.name.includes(searchQuery) || 
+      s.id.includes(searchQuery) || 
+      s.class.includes(searchQuery);
+    return classMatch && searchMatch;
+  });
 
   return (
     <div style={{ background: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
@@ -216,6 +226,39 @@ const StudentManager = ({ students, setStudents }) => {
               onFocus={(e) => e.target.style.borderColor = '#667eea'}
               onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
             />
+          </div>
+          
+          {/* 班级筛选下拉框 */}
+          <div style={{ position: 'relative', minWidth: '180px' }}>
+            <Filter size={18} color="#999" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+            <select
+              value={selectedClass}
+              onChange={(e) => setSelectedClass(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '10px 12px 10px 40px',
+                border: '2px solid #e5e7eb',
+                borderRadius: '8px',
+                fontSize: '14px',
+                outline: 'none',
+                cursor: 'pointer',
+                backgroundColor: 'white',
+                transition: 'border-color 0.3s',
+                appearance: 'none',
+                backgroundImage: 'url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23999\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3e%3cpolyline points=\'6 9 12 15 18 9\'%3e%3c/polyline%3e%3c/svg%3e")',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'right 12px center',
+                backgroundSize: '16px',
+                paddingRight: '40px'
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#667eea'}
+              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+            >
+              <option value="">{t('allClasses')}</option>
+              {allClasses.map(className => (
+                <option key={className} value={className}>{className}</option>
+              ))}
+            </select>
           </div>
         </div>
 
@@ -283,8 +326,13 @@ const StudentManager = ({ students, setStudents }) => {
       {/* 统计信息 */}
       <div style={{ marginBottom: '16px', padding: '12px 16px', background: '#f9fafb', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ fontSize: '14px', color: '#666' }}>
-          共 <span style={{ fontWeight: '600', color: '#1a1a2e' }}>{filteredStudents.length}</span> 名学生
-          {searchQuery && ` (从 ${students.length} 名中筛选)`}
+          {interpolate(t('totalStudentsCount'), { count: filteredStudents.length })}
+          {(searchQuery || selectedClass) && ` ${interpolate(t('filteredFrom'), { total: students.length })}`}
+          {selectedClass && (
+            <span style={{ marginLeft: '8px', padding: '2px 8px', background: '#667eea', color: 'white', borderRadius: '4px', fontSize: '12px' }}>
+              {selectedClass}
+            </span>
+          )}
         </div>
         {selectedIds.length > 0 && (
           <div style={{ fontSize: '14px', color: '#667eea', fontWeight: '500' }}>
