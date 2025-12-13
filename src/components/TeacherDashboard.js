@@ -787,10 +787,22 @@ const StudentManager = ({ students, setStudents }) => {
 
 // 代码库管理组件
 const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
+  const [activeTab, setActiveTab] = useState('snippets'); // 'snippets' | 'visualizations'
   const [showModal, setShowModal] = useState(false);
   const [editingSnippet, setEditingSnippet] = useState(null);
   const [newSnippet, setNewSnippet] = useState({ title: '', category: 'HTML/CSS', content: '' });
   const [filter, setFilter] = useState('');
+  
+  // 可视化示例相关state
+  const [visualizations, setVisualizations] = useState([]);
+  const [showVizModal, setShowVizModal] = useState(false);
+  const [editingViz, setEditingViz] = useState(null);
+  const [newViz, setNewViz] = useState({ 
+    title: '', 
+    description: '', 
+    category: '条形图', 
+    files: {} 
+  });
 
   const addSnippet = async () => {
     if(!newSnippet.title) return alert('请输入标题');
@@ -883,25 +895,179 @@ const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
     return '💻';
   };
 
+  // 加载可视化示例
+  const loadVisualizations = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/visualization-examples');
+      if (response.ok) {
+        const data = await response.json();
+        setVisualizations(data);
+      }
+    } catch (error) {
+      console.error('加载可视化示例失败:', error);
+    }
+  };
+
+  // 添加/更新可视化示例
+  const saveVisualization = async () => {
+    if (!newViz.title) return alert('请输入标题');
+    if (!newViz.files || Object.keys(newViz.files).length === 0) {
+      return alert('请添加文件内容');
+    }
+
+    try {
+      if (editingViz) {
+        const response = await fetch(`http://localhost:5000/api/visualization-examples/${editingViz.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newViz)
+        });
+        
+        if (response.ok) {
+          await loadVisualizations();
+          alert('✅ 可视化示例更新成功！');
+        }
+      } else {
+        const response = await fetch('http://localhost:5000/api/visualization-examples', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...newViz, created_by: 1 })
+        });
+        
+        if (response.ok) {
+          await loadVisualizations();
+          alert('✅ 可视化示例创建成功！');
+        }
+      }
+      
+      setShowVizModal(false);
+      setEditingViz(null);
+      setNewViz({ title: '', description: '', category: '条形图', files: {} });
+    } catch (error) {
+      console.error('保存可视化示例失败:', error);
+      alert('保存失败，请重试');
+    }
+  };
+
+  // 删除可视化示例
+  const deleteVisualization = async (id) => {
+    if (window.confirm('确定删除此可视化示例？')) {
+      try {
+        const response = await fetch(`http://localhost:5000/api/visualization-examples/${id}`, {
+          method: 'DELETE'
+        });
+        
+        if (response.ok) {
+          await loadVisualizations();
+          alert('✅ 删除成功！');
+        }
+      } catch (error) {
+        console.error('删除可视化示例失败:', error);
+        alert('删除失败，请重试');
+      }
+    }
+  };
+
+  // 编辑可视化示例
+  const startEditViz = (viz) => {
+    setEditingViz(viz);
+    setNewViz({
+      title: viz.title,
+      description: viz.description || '',
+      category: viz.category,
+      files: viz.files
+    });
+    setShowVizModal(true);
+  };
+
+  // 从编辑器导入项目
+  const importFromEditor = () => {
+    onOpenEditor({
+      mode: 'export_to_viz',
+      onExport: (projectData) => {
+        setNewViz({
+          ...newViz,
+          files: projectData.files
+        });
+        alert('✅ 项目已导入！请填写标题和描述后保存。');
+      }
+    });
+  };
+
+  // 在编辑器中预览
+  const previewInEditor = (viz) => {
+    onOpenEditor({
+      mode: 'practice',
+      title: `预览 - ${viz.title}`,
+      template: viz.files
+    });
+  };
+
+  // 加载可视化示例（组件挂载时）
+  React.useEffect(() => {
+    if (activeTab === 'visualizations') {
+      loadVisualizations();
+    }
+  }, [activeTab]);
+
   const filteredRepo = repo.filter(r => r.title.includes(filter) || r.category.includes(filter));
+  const filteredViz = visualizations.filter(v => 
+    v.title.includes(filter) || v.category.includes(filter) || (v.description && v.description.includes(filter))
+  );
 
   return (
     <div style={{ background: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+      {/* 标签页 */}
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', borderBottom: '2px solid #e5e7eb' }}>
+        <button
+          onClick={() => setActiveTab('snippets')}
+          style={{
+            padding: '12px 24px',
+            background: activeTab === 'snippets' ? '#667eea' : 'transparent',
+            color: activeTab === 'snippets' ? 'white' : '#6b7280',
+            border: 'none',
+            borderRadius: '8px 8px 0 0',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: '600',
+            transition: 'all 0.3s'
+          }}
+        >
+          💻 代码片段
+        </button>
+        <button
+          onClick={() => setActiveTab('visualizations')}
+          style={{
+            padding: '12px 24px',
+            background: activeTab === 'visualizations' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'transparent',
+            color: activeTab === 'visualizations' ? 'white' : '#6b7280',
+            border: 'none',
+            borderRadius: '8px 8px 0 0',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: '600',
+            transition: 'all 0.3s'
+          }}
+        >
+          📊 可视化示例
+        </button>
+      </div>
+
       {/* 头部 */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div>
           <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '600', color: '#1a1a2e' }}>
-            代码库
+            {activeTab === 'snippets' ? '代码片段' : '可视化示例'}
           </h3>
           <p style={{ margin: '4px 0 0', fontSize: '14px', color: '#6b7280' }}>
-            共 {repo.length} 个代码片段
+            共 {activeTab === 'snippets' ? repo.length : visualizations.length} 个{activeTab === 'snippets' ? '代码片段' : '示例'}
           </p>
         </div>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <div style={{ position: 'relative' }}>
             <Search size={18} color="#999" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
             <input 
-              placeholder="搜索代码..." 
+              placeholder={activeTab === 'snippets' ? "搜索代码..." : "搜索示例..."} 
               value={filter} 
               onChange={e=>setFilter(e.target.value)} 
               style={{
@@ -918,7 +1084,17 @@ const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
             />
           </div>
           <button 
-            onClick={() => { setEditingSnippet(null); setNewSnippet({ title: '', category: 'HTML/CSS', content: '' }); setShowModal(true); }} 
+            onClick={() => { 
+              if (activeTab === 'snippets') {
+                setEditingSnippet(null); 
+                setNewSnippet({ title: '', category: 'HTML/CSS', content: '' }); 
+                setShowModal(true);
+              } else {
+                setEditingViz(null);
+                setNewViz({ title: '', description: '', category: '条形图', files: {} });
+                setShowVizModal(true);
+              }
+            }} 
             style={{ 
               padding: '10px 20px', 
               background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
@@ -952,7 +1128,7 @@ const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
             {filter ? '尝试使用其他关键词搜索' : '点击上方"添加代码"按钮创建第一个代码片段'}
           </div>
         </div>
-      ) : (
+      ) : activeTab === 'snippets' ? (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
           {filteredRepo.map(item => (
             <div 
@@ -1077,6 +1253,157 @@ const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
                   onMouseEnter={(e) => e.currentTarget.style.background = '#fecaca'}
                   onMouseLeave={(e) => e.currentTarget.style.background = '#fee2e2'}>
                   <Trash2 size={14}/>
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '16px' }}>
+          {filteredViz.map(viz => (
+            <div 
+              key={viz.id} 
+              style={{ 
+                background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)', 
+                borderRadius: '12px', 
+                padding: '20px', 
+                border: '2px solid #667eea', 
+                display: 'flex', 
+                flexDirection: 'column',
+                transition: 'all 0.3s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow = '0 8px 16px rgba(102, 126, 234, 0.3)';
+                e.currentTarget.style.transform = 'translateY(-4px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = 'none';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}>
+              {/* 头部 */}
+              <div style={{ display: 'flex', alignItems: 'start', gap: '12px', marginBottom: '12px' }}>
+                <div style={{ fontSize: '40px' }}>📊</div>
+                <div style={{ flex: 1 }}>
+                  <h4 style={{ margin: '0 0 4px', fontSize: '17px', fontWeight: '600', color: '#1a1a2e' }}>
+                    {viz.title}
+                  </h4>
+                  <div style={{ fontSize: '12px', color: '#667eea', fontWeight: '600', background: 'white', padding: '4px 8px', borderRadius: '4px', display: 'inline-block' }}>
+                    {viz.category}
+                  </div>
+                </div>
+              </div>
+
+              {/* 描述 */}
+              {viz.description && (
+                <p style={{ 
+                  fontSize: '13px', 
+                  color: '#4b5563', 
+                  marginBottom: '12px',
+                  lineHeight: '1.6',
+                  background: 'rgba(255,255,255,0.7)',
+                  padding: '12px',
+                  borderRadius: '8px'
+                }}>
+                  {viz.description}
+                </p>
+              )}
+
+              {/* 文件信息 */}
+              <div style={{ 
+                background: 'rgba(255,255,255,0.9)', 
+                padding: '12px', 
+                borderRadius: '8px', 
+                marginBottom: '16px',
+                fontSize: '12px',
+                color: '#6b7280'
+              }}>
+                <div style={{ fontWeight: '600', marginBottom: '6px', color: '#374151' }}>📁 包含文件：</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                  {Object.keys(viz.files || {}).map(fileName => (
+                    <span key={fileName} style={{ 
+                      background: '#e0e7ff', 
+                      color: '#4338ca', 
+                      padding: '4px 8px', 
+                      borderRadius: '4px',
+                      fontSize: '11px',
+                      fontWeight: '500'
+                    }}>
+                      {fileName}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* 创建信息 */}
+              <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '12px' }}>
+                创建于: {new Date(viz.created_at).toLocaleDateString()}
+                {viz.creator_name && ` | 创建者: ${viz.creator_name}`}
+              </div>
+
+              {/* 操作按钮 */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', marginTop: 'auto' }}>
+                <button 
+                  onClick={() => previewInEditor(viz)} 
+                  style={{
+                    padding: '10px',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '4px',
+                    transition: 'transform 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
+                  👁️ 预览
+                </button>
+                <button 
+                  onClick={() => startEditViz(viz)} 
+                  style={{
+                    padding: '10px',
+                    background: '#dbeafe',
+                    color: '#1e40af',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '4px',
+                    transition: 'background 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#bfdbfe'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = '#dbeafe'}>
+                  ✏️ 编辑
+                </button>
+                <button 
+                  onClick={() => deleteVisualization(viz.id)} 
+                  style={{
+                    padding: '10px',
+                    background: '#fee2e2',
+                    color: '#dc2626',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '4px',
+                    transition: 'background 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#fecaca'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = '#fee2e2'}>
+                  🗑️ 删除
                 </button>
               </div>
             </div>
@@ -1222,12 +1549,218 @@ const CodeRepository = ({ repo, setRepo, onOpenEditor }) => {
           </div>
         </div>
       )}
+
+      {/* 可视化示例模态框 */}
+      {showVizModal && (
+        <div style={{ 
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+          background: 'rgba(0,0,0,0.6)', display: 'flex', 
+          justifyContent: 'center', alignItems: 'center', zIndex: 1000,
+          backdropFilter: 'blur(4px)'
+        }}>
+          <div style={{ 
+            background: 'white', 
+            borderRadius: '16px', 
+            width: '700px', 
+            maxHeight: '85vh', 
+            overflow: 'hidden',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            {/* 头部 */}
+            <div style={{
+              padding: '24px 32px',
+              borderBottom: '1px solid #e5e7eb',
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+            }}>
+              <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '600', color: 'white', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span>📊</span>
+                {editingViz ? '编辑可视化示例' : '添加可视化示例'}
+              </h3>
+            </div>
+
+            {/* 内容 */}
+            <div style={{ flex: 1, overflow: 'auto', padding: '24px 32px' }}>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{display:'block', marginBottom:'8px', fontWeight:'500', fontSize: '14px'}}>标题 *</label>
+                <input 
+                  style={{
+                    width:'100%', 
+                    padding:'10px', 
+                    border:'2px solid #e5e7eb', 
+                    borderRadius:'8px',
+                    fontSize: '14px'
+                  }} 
+                  value={newViz.title} 
+                  onChange={e=>setNewViz({...newViz, title:e.target.value})} 
+                  placeholder="例如：D3.js条形图示例"
+                />
+              </div>
+
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{display:'block', marginBottom:'8px', fontWeight:'500', fontSize: '14px'}}>描述</label>
+                <textarea 
+                  style={{
+                    width:'100%', 
+                    padding:'10px', 
+                    border:'2px solid #e5e7eb', 
+                    borderRadius:'8px',
+                    fontSize: '14px',
+                    minHeight: '80px',
+                    resize: 'vertical'
+                  }} 
+                  value={newViz.description} 
+                  onChange={e=>setNewViz({...newViz, description:e.target.value})} 
+                  placeholder="简要描述这个可视化示例的功能和用途..."
+                />
+              </div>
+
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{display:'block', marginBottom:'8px', fontWeight:'500', fontSize: '14px'}}>分类</label>
+                <select 
+                  style={{
+                    width:'100%', 
+                    padding:'10px', 
+                    border:'2px solid #e5e7eb', 
+                    borderRadius:'8px',
+                    fontSize: '14px'
+                  }} 
+                  value={newViz.category} 
+                  onChange={e=>setNewViz({...newViz, category:e.target.value})}>
+                  <option value="条形图">条形图</option>
+                  <option value="折线图">折线图</option>
+                  <option value="饼图">饼图</option>
+                  <option value="散点图">散点图</option>
+                  <option value="地图">地图</option>
+                  <option value="其他">其他</option>
+                </select>
+              </div>
+
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{display:'block', marginBottom:'8px', fontWeight:'500', fontSize: '14px'}}>文件内容</label>
+                <div style={{ 
+                  background: '#f9fafb', 
+                  border: '2px dashed #d1d5db', 
+                  borderRadius: '8px', 
+                  padding: '20px',
+                  textAlign: 'center'
+                }}>
+                  {Object.keys(newViz.files || {}).length > 0 ? (
+                    <div>
+                      <div style={{ fontSize: '14px', color: '#374151', marginBottom: '12px', fontWeight: '500' }}>
+                        已添加 {Object.keys(newViz.files).length} 个文件：
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center', marginBottom: '12px' }}>
+                        {Object.keys(newViz.files).map(fileName => (
+                          <span key={fileName} style={{ 
+                            background: '#e0e7ff', 
+                            color: '#4338ca', 
+                            padding: '6px 12px', 
+                            borderRadius: '6px',
+                            fontSize: '12px',
+                            fontWeight: '500'
+                          }}>
+                            📄 {fileName}
+                          </span>
+                        ))}
+                      </div>
+                      <button
+                        onClick={() => setNewViz({...newViz, files: {}})}
+                        style={{
+                          padding: '8px 16px',
+                          background: '#fee2e2',
+                          color: '#dc2626',
+                          border: 'none',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          fontSize: '13px',
+                          fontWeight: '500'
+                        }}
+                      >
+                        清空文件
+                      </button>
+                    </div>
+                  ) : (
+                    <div>
+                      <div style={{ fontSize: '40px', marginBottom: '12px' }}>📁</div>
+                      <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '16px' }}>
+                        暂无文件，请从编辑器导入项目
+                      </div>
+                      <button
+                        onClick={importFromEditor}
+                        style={{
+                          padding: '10px 20px',
+                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          fontSize: '14px',
+                          fontWeight: '500'
+                        }}
+                      >
+                        📥 从编辑器导入
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <p style={{ fontSize: '12px', color: '#9ca3af', marginTop: '8px' }}>
+                  💡 提示：在编辑器中创建好项目后，点击"从编辑器导入"按钮
+                </p>
+              </div>
+            </div>
+
+            {/* 底部按钮 */}
+            <div style={{ 
+              padding: '20px 32px', 
+              borderTop: '1px solid #e5e7eb',
+              display: 'flex',
+              gap: '12px',
+              justifyContent: 'flex-end'
+            }}>
+              <button 
+                onClick={() => {
+                  setShowVizModal(false);
+                  setEditingViz(null);
+                  setNewViz({ title: '', description: '', category: '条形图', files: {} });
+                }}
+                style={{
+                  padding:'10px 20px', 
+                  background:'white', 
+                  color:'#6b7280', 
+                  borderRadius:'8px', 
+                  cursor:'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  border: '2px solid #e5e7eb'
+                }}>
+                取消
+              </button>
+              <button 
+                onClick={saveVisualization} 
+                style={{
+                  padding:'10px 20px', 
+                  background:'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
+                  color:'white', 
+                  border:'none', 
+                  borderRadius:'8px', 
+                  cursor:'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}>
+                {editingViz ? '保存修改' : '添加示例'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 // 课件管理组件
-const CoursewareManagement = () => {
+const CoursewareManagement = ({ onOpenEditor }) => {
   const [courseware, setCourseware] = useState([]);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showAnchorEditor, setShowAnchorEditor] = useState(false);
@@ -1799,6 +2332,7 @@ const CoursewareManagement = () => {
             setShowPresentation(false);
             setSelectedCourseware(null);
           }}
+          onOpenEditor={onOpenEditor}
         />
       )}
     </div>
@@ -3281,7 +3815,7 @@ function TeacherDashboard({ data, setData, onOpenEditor, onLogout, user }) {
         )}
 
         {activeTab === 'courseware' && (
-          <CoursewareManagement />
+          <CoursewareManagement onOpenEditor={onOpenEditor} />
         )}
 
         {activeTab === 'qa' && (

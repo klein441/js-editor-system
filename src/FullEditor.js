@@ -168,6 +168,502 @@ body {
 };
 
 // ==========================================
+// 可视化示例项目集合
+// ==========================================
+const VISUALIZATION_EXAMPLES = {
+  '条形图': {
+  'index.html': `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D3.js 加载 CSV 和 JSON 数据</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <h2>月度销售额 (数据来自 CSV 文件)</h2>
+    <svg id="csvChart" width="500" height="300"></svg>
+    
+    <h2>季度利润统计 (数据来自 JSON 文件)</h2>
+    <svg id="jsonChart" width="500" height="300"></svg>
+    
+    <p>提示：打开浏览器开发者工具的 Console 面板可以看到加载的数据。</p>
+
+    <script>
+        // 通用图表初始化函数
+        function initChart(svgId) {
+            const svg = d3.select(\`#\${svgId}\`);
+            const width = +svg.attr("width");
+            const height = +svg.attr("height");
+            const margin = {top: 20, right: 20, bottom: 30, left: 40};
+            const chartWidth = width - margin.left - margin.right;
+            const chartHeight = height - margin.top - margin.bottom;
+
+            // 创建图表分组
+            const chartGroup = svg.append("g")
+                .attr("transform", \`translate(\${margin.left}, \${margin.top})\`);
+
+            // 定义比例尺和坐标轴
+            const xScale = d3.scaleBand().range([0, chartWidth]).padding(0.1);
+            const yScale = d3.scaleLinear().range([chartHeight, 0]);
+            const xAxis = d3.axisBottom(xScale);
+            const yAxis = d3.axisLeft(yScale);
+
+            // 添加坐标轴容器
+            chartGroup.append("g")
+                .attr("class", "x-axis")
+                .attr("transform", \`translate(0, \${chartHeight})\`);
+
+            chartGroup.append("g")
+                .attr("class", "y-axis");
+
+            return { svg, chartGroup, xScale, yScale, xAxis, yAxis, chartWidth, chartHeight };
+        }
+
+        // 更新图表函数
+        function updateChart(chart, data, valueKey) {
+            // 转换数值类型
+            data.forEach(d => {
+                d[valueKey] = +d[valueKey];
+            });
+
+            // 设置比例尺定义域
+            chart.xScale.domain(data.map(d => d.name));
+            chart.yScale.domain([0, d3.max(data, d => d[valueKey])]);
+
+            // 更新坐标轴
+            chart.chartGroup.select(".x-axis").call(chart.xAxis);
+            chart.chartGroup.select(".y-axis").call(chart.yAxis);
+
+            // 处理条形
+            const bars = chart.chartGroup.selectAll(".bar").data(data, d => d.name);
+            bars.exit().remove();
+            const newBars = bars.enter().append("rect").attr("class", "bar");
+            newBars.merge(bars)
+                .attr("x", d => chart.xScale(d.name))
+                .attr("y", d => chart.yScale(d[valueKey]))
+                .attr("width", chart.xScale.bandwidth())
+                .attr("height", d => chart.chartHeight - chart.yScale(d[valueKey]));
+
+            // 处理标签
+            const labels = chart.chartGroup.selectAll(".label").data(data, d => d.name);
+            labels.exit().remove();
+            const newLabels = labels.enter().append("text").attr("class", "label");
+            newLabels.merge(labels)
+                .attr("x", d => chart.xScale(d.name) + chart.xScale.bandwidth() / 2)
+                .attr("y", d => chart.yScale(d[valueKey]) - 5)
+                .text(d => d[valueKey]);
+        }
+
+        // 初始化两个图表
+        const csvChart = initChart("csvChart");
+        const jsonChart = initChart("jsonChart");
+
+        // 加载 CSV 数据
+        d3.csv("sales-data.csv")
+            .then(function(data) {
+                console.log("从 CSV 加载的原始数据:", data);
+                // 将 month 字段重命名为 name 以匹配图表函数
+                data.forEach(d => {
+                    d.name = d.month;
+                });
+                updateChart(csvChart, data, "sales");
+            })
+            .catch(function(error) {
+                console.error("加载 CSV 文件时出错:", error);
+                alert("加载CSV数据失败，请检查文件路径或网络连接。");
+            });
+
+        // 加载 JSON 数据
+        d3.json("profit-data.json")
+            .then(function(data) {
+                console.log("从 JSON 加载的原始数据:", data);
+                updateChart(jsonChart, data, "profit");
+            })
+            .catch(function(error) {
+                console.error("加载 JSON 文件时出错:", error);
+                alert("加载JSON数据失败，请检查文件路径或网络连接。");
+            });
+
+    </script>
+
+</body>
+</html>`,
+  'styles.css': `/* 基础样式重置与全局设置 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+/* 页面容器样式 */
+body {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* 标题样式 */
+h2 {
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-weight: 600;
+}
+
+/* SVG 图表容器样式 */
+svg {
+    width: 100%;
+    max-width: 500px;
+    height: 300px;
+    margin: 0 auto;
+    display: block;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 条形图样式 */
+.bar {
+    fill: steelblue;
+    transition: all 0.3s ease;
+    rx: 2; /* 轻微圆角 */
+    ry: 2;
+}
+
+.bar:hover {
+    fill: orange;
+    transform: translateY(-2px);
+}
+
+/* 数据标签样式 */
+.label {
+    font-size: 12px;
+    text-anchor: middle;
+    fill: #333;
+    font-weight: 500;
+}
+
+/* 坐标轴样式优化 */
+.x-axis text, .y-axis text {
+    font-size: 11px;
+    fill: #666;
+}
+
+.x-axis path, .y-axis path {
+    stroke: #ddd;
+}
+
+.x-axis line, .y-axis line {
+    stroke: #eee;
+}
+
+/* 提示文本样式 */
+p {
+    text-align: center;
+    margin-top: 1rem;
+    color: #666;
+    font-size: 0.9rem;
+}`,
+  'sales-data.csv': `month,sales
+一月,120
+二月,190
+三月,80
+四月,250`,
+  'profit-data.json': `[
+    {"name": "Q1", "profit": 12000},
+    {"name": "Q2", "profit": 19000},
+    {"name": "Q3", "profit": 15000},
+    {"name": "Q4", "profit": 22000}
+]`
+  },
+  '折线图': {
+    'index.html': `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D3.js 折线图 - 温度趋势</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <h2>月度平均温度趋势 (数据来自 CSV 文件)</h2>
+    <svg id="tempChart" width="600" height="400"></svg>
+    
+    <h2>股票价格走势 (数据来自 JSON 文件)</h2>
+    <svg id="stockChart" width="600" height="400"></svg>
+    
+    <p>提示：鼠标悬停在数据点上可以查看详细信息。</p>
+
+    <script>
+        // 通用折线图初始化函数
+        function initLineChart(svgId) {
+            const svg = d3.select(\`#\${svgId}\`);
+            const width = +svg.attr("width");
+            const height = +svg.attr("height");
+            const margin = {top: 20, right: 30, bottom: 40, left: 50};
+            const chartWidth = width - margin.left - margin.right;
+            const chartHeight = height - margin.top - margin.bottom;
+
+            // 创建图表分组
+            const chartGroup = svg.append("g")
+                .attr("transform", \`translate(\${margin.left}, \${margin.top})\`);
+
+            // 定义比例尺
+            const xScale = d3.scalePoint().range([0, chartWidth]).padding(0.5);
+            const yScale = d3.scaleLinear().range([chartHeight, 0]);
+            
+            // 定义坐标轴
+            const xAxis = d3.axisBottom(xScale);
+            const yAxis = d3.axisLeft(yScale);
+
+            // 添加坐标轴容器
+            chartGroup.append("g")
+                .attr("class", "x-axis")
+                .attr("transform", \`translate(0, \${chartHeight})\`);
+
+            chartGroup.append("g")
+                .attr("class", "y-axis");
+
+            // 定义折线生成器
+            const line = d3.line()
+                .x(d => xScale(d.name))
+                .y(d => yScale(d.value))
+                .curve(d3.curveMonotoneX);
+
+            // 添加折线路径
+            chartGroup.append("path")
+                .attr("class", "line");
+
+            // 添加数据点容器
+            chartGroup.append("g")
+                .attr("class", "dots");
+
+            return { svg, chartGroup, xScale, yScale, xAxis, yAxis, line, chartWidth, chartHeight };
+        }
+
+        // 更新折线图函数
+        function updateLineChart(chart, data, valueKey) {
+            // 转换数值类型
+            data.forEach(d => {
+                d.value = +d[valueKey];
+            });
+
+            // 设置比例尺定义域
+            chart.xScale.domain(data.map(d => d.name));
+            chart.yScale.domain([
+                d3.min(data, d => d.value) * 0.9,
+                d3.max(data, d => d.value) * 1.1
+            ]);
+
+            // 更新坐标轴
+            chart.chartGroup.select(".x-axis").call(chart.xAxis);
+            chart.chartGroup.select(".y-axis").call(chart.yAxis);
+
+            // 更新折线
+            chart.chartGroup.select(".line")
+                .datum(data)
+                .attr("d", chart.line)
+                .attr("fill", "none")
+                .attr("stroke", "steelblue")
+                .attr("stroke-width", 2);
+
+            // 更新数据点
+            const dots = chart.chartGroup.select(".dots")
+                .selectAll(".dot")
+                .data(data);
+
+            dots.exit().remove();
+
+            const newDots = dots.enter()
+                .append("circle")
+                .attr("class", "dot");
+
+            newDots.merge(dots)
+                .attr("cx", d => chart.xScale(d.name))
+                .attr("cy", d => chart.yScale(d.value))
+                .attr("r", 5)
+                .attr("fill", "steelblue")
+                .on("mouseover", function(event, d) {
+                    d3.select(this)
+                        .attr("r", 7)
+                        .attr("fill", "orange");
+                    
+                    // 显示提示信息
+                    chart.chartGroup.append("text")
+                        .attr("class", "tooltip")
+                        .attr("x", chart.xScale(d.name))
+                        .attr("y", chart.yScale(d.value) - 15)
+                        .attr("text-anchor", "middle")
+                        .text(\`\${d.name}: \${d.value}\`);
+                })
+                .on("mouseout", function() {
+                    d3.select(this)
+                        .attr("r", 5)
+                        .attr("fill", "steelblue");
+                    
+                    chart.chartGroup.selectAll(".tooltip").remove();
+                });
+        }
+
+        // 初始化两个图表
+        const tempChart = initLineChart("tempChart");
+        const stockChart = initLineChart("stockChart");
+
+        // 加载温度数据 (CSV)
+        d3.csv("temperature-data.csv")
+            .then(function(data) {
+                console.log("从 CSV 加载的温度数据:", data);
+                updateLineChart(tempChart, data, "temperature");
+            })
+            .catch(function(error) {
+                console.error("加载 CSV 文件时出错:", error);
+                alert("加载CSV数据失败，请检查文件路径。");
+            });
+
+        // 加载股票数据 (JSON)
+        d3.json("stock-data.json")
+            .then(function(data) {
+                console.log("从 JSON 加载的股票数据:", data);
+                updateLineChart(stockChart, data, "price");
+            })
+            .catch(function(error) {
+                console.error("加载 JSON 文件时出错:", error);
+                alert("加载JSON数据失败，请检查文件路径。");
+            });
+
+    </script>
+
+</body>
+</html>`,
+    'styles.css': `/* 基础样式重置与全局设置 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+/* 页面容器样式 */
+body {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    color: #333;
+    line-height: 1.6;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+}
+
+/* 标题样式 */
+h2 {
+    color: #2c3e50;
+    margin: 2rem 0 1.5rem;
+    text-align: center;
+    font-weight: 600;
+}
+
+/* SVG 图表容器样式 */
+svg {
+    width: 100%;
+    max-width: 600px;
+    height: 400px;
+    margin: 0 auto;
+    display: block;
+    border: 1px solid #ddd;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* 折线样式 */
+.line {
+    fill: none;
+    stroke: steelblue;
+    stroke-width: 2;
+}
+
+/* 数据点样式 */
+.dot {
+    fill: steelblue;
+    stroke: white;
+    stroke-width: 2;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.dot:hover {
+    fill: orange;
+    r: 7;
+}
+
+/* 提示文本样式 */
+.tooltip {
+    font-size: 14px;
+    font-weight: bold;
+    fill: #333;
+    pointer-events: none;
+}
+
+/* 坐标轴样式优化 */
+.x-axis text, .y-axis text {
+    font-size: 12px;
+    fill: #666;
+}
+
+.x-axis path, .y-axis path {
+    stroke: #999;
+}
+
+.x-axis line, .y-axis line {
+    stroke: #ddd;
+}
+
+/* 页面提示文本样式 */
+p {
+    text-align: center;
+    margin-top: 2rem;
+    color: #666;
+    font-size: 0.9rem;
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}`,
+    'temperature-data.csv': `name,temperature
+一月,5
+二月,7
+三月,12
+四月,18
+五月,23
+六月,28
+七月,32
+八月,31
+九月,26
+十月,20
+十一月,13
+十二月,7`,
+    'stock-data.json': `[
+    {"name": "周一", "price": 150},
+    {"name": "周二", "price": 155},
+    {"name": "周三", "price": 148},
+    {"name": "周四", "price": 162},
+    {"name": "周五", "price": 158},
+    {"name": "周六", "price": 165},
+    {"name": "周日", "price": 170}
+]`
+  }
+};
+
+// ==========================================
 // 文件选择提交模态框组件
 // ==========================================
 const SubmitModal = ({ show, files, projectFiles, onClose, onSubmit }) => {
@@ -388,6 +884,8 @@ function FullEditor({
   const [showTemplates, setShowTemplates] = useState(false);
   const [showBgTemplates, setShowBgTemplates] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [showVisualizationExamples, setShowVisualizationExamples] = useState(false);
+  const [allVisualizationExamples, setAllVisualizationExamples] = useState(VISUALIZATION_EXAMPLES);
   const [themeName, setThemeName] = useState(() => {
     try {
       return localStorage.getItem('my-js-editor-theme') || 'dark';
@@ -398,6 +896,29 @@ function FullEditor({
   const [editorWidth, setEditorWidth] = useState(60);
   const [isDragging, setIsDragging] = useState(false);
   const [d3Data, setD3Data] = useState(null);
+
+  // 加载数据库中的可视化示例
+  useEffect(() => {
+    const loadDatabaseExamples = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/visualization-examples');
+        if (response.ok) {
+          const dbExamples = await response.json();
+          // 合并内置示例和数据库示例
+          const merged = { ...VISUALIZATION_EXAMPLES };
+          dbExamples.forEach(example => {
+            merged[example.title] = example.files;
+          });
+          setAllVisualizationExamples(merged);
+        }
+      } catch (error) {
+        console.error('加载数据库示例失败:', error);
+        // 失败时使用内置示例
+        setAllVisualizationExamples(VISUALIZATION_EXAMPLES);
+      }
+    };
+    loadDatabaseExamples();
+  }, []);
 
   useEffect(() => {
     if (initialFiles && Object.keys(initialFiles).length > 0) {
@@ -974,6 +1495,44 @@ console.log('📁 虚拟文件系统已加载，文件数量:', Object.keys(wind
     setShowTemplates(false);
   };
 
+  // 加载可视化示例项目
+  const loadVisualizationExample = (exampleName) => {
+    if (!window.confirm(`加载"${exampleName}"示例将清空当前项目，是否继续？`)) {
+      return;
+    }
+
+    const exampleData = allVisualizationExamples[exampleName];
+    if (!exampleData) {
+      alert('示例不存在！');
+      return;
+    }
+
+    // 创建新项目
+    const newProjectId = Date.now().toString();
+    const fileList = Object.keys(exampleData).map(fileName => ({
+      id: `${newProjectId}_${fileName}`,
+      name: fileName,
+      path: fileName,
+      type: 'file',
+      parentPath: ''
+    }));
+
+    // 设置项目和文件
+    setProjects([{
+      id: newProjectId,
+      name: `可视化示例 - ${exampleName}`,
+      files: fileList
+    }]);
+    setCurrentProject(newProjectId);
+    setFiles(exampleData);
+    setCurrentFile('index.html');
+    setCode(exampleData['index.html']);
+    setShowVisualizationExamples(false);
+    
+    const fileNames = Object.keys(exampleData).join('\n- ');
+    alert(`✅ ${exampleName}示例已加载！\n\n包含文件：\n- ${fileNames}\n\n点击运行按钮查看效果！`);
+  };
+
   const handleFileUpload = (e) => {
     const uploadedFiles = Array.from(e.target.files);
     uploadedFiles.forEach(file => {
@@ -1184,6 +1743,17 @@ console.log('📁 虚拟文件系统已加载，文件数量:', Object.keys(wind
           <button onClick={() => setShowTemplates(!showTemplates)} className="toolbar-btn"><FileCode size={16} /> 模板</button>
           <button onClick={() => setShowBgTemplates(!showBgTemplates)} className="toolbar-btn"><Folder size={16} /> 背景模板</button>
           <button onClick={() => csvInputRef.current?.click()} className="toolbar-btn"><Upload size={16} /> 上传 CSV</button>
+          <button 
+            onClick={() => setShowVisualizationExamples(!showVisualizationExamples)} 
+            className="toolbar-btn" 
+            style={{ 
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              fontWeight: '600'
+            }}
+            title="加载D3.js可视化示例项目"
+          >
+            <BarChart3 size={16} /> 可视化示例
+          </button>
         </div>
 
         <input ref={fileInputRef} type="file" multiple onChange={handleFileUpload} style={{ display: 'none' }} accept=".html,.css,.js,.jsx,.json,.txt,.md" />
@@ -1203,6 +1773,49 @@ console.log('📁 虚拟文件系统已加载，文件数量:', Object.keys(wind
         )}
 
         <BackgroundTemplates show={showBgTemplates} loadTemplate={loadBgTemplate} />
+
+        {/* 可视化示例选择窗口 */}
+        {showVisualizationExamples && (
+          <div style={{ padding: '12px', borderBottom: '1px solid #3e3e42', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+            <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '12px', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <BarChart3 size={18} />
+              选择可视化示例:
+            </div>
+            {Object.keys(allVisualizationExamples).map(name => (
+              <button 
+                key={name} 
+                onClick={() => loadVisualizationExample(name)}
+                style={{ 
+                  width: '100%', 
+                  padding: '12px', 
+                  marginBottom: '8px', 
+                  background: 'rgba(255,255,255,0.95)', 
+                  color: '#333', 
+                  border: 'none', 
+                  borderRadius: '6px', 
+                  cursor: 'pointer', 
+                  textAlign: 'left', 
+                  fontSize: '13px',
+                  fontWeight: '500',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = 'white';
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = 'rgba(255,255,255,0.95)';
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                }}
+              >
+                📊 {name}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* 文件树 */}
         <div style={{ flex: 1, overflow: 'auto', padding: '12px' }}>

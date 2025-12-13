@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Play, ArrowLeft, Video, Code, BookOpen } from 'lucide-react';
 
-const AnchorDemo = ({ coursewareId, onBack }) => {
+const AnchorDemo = ({ coursewareId, onBack, onOpenEditor }) => {
   const [slides, setSlides] = useState([]);
   const [anchors, setAnchors] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -193,6 +193,92 @@ const AnchorDemo = ({ coursewareId, onBack }) => {
               <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>
                 {resource.resource_content}
               </pre>
+            </div>
+          </div>
+        );
+      
+      case 'editor':
+        return (
+          <div>
+            <h4>{resource.title}</h4>
+            {resource.description && <p>{resource.description}</p>}
+            <div style={{
+              backgroundColor: '#f0f9ff',
+              padding: '30px',
+              borderRadius: '12px',
+              border: '2px solid #0ea5e9',
+              textAlign: 'center',
+              marginTop: '20px'
+            }}>
+              <div style={{ fontSize: '48px', marginBottom: '15px' }}>💻</div>
+              <h3 style={{ color: '#0369a1', marginBottom: '10px' }}>在线编译系统</h3>
+              <p style={{ color: '#0c4a6e', marginBottom: '20px' }}>
+                点击下方按钮打开JS在线编译器，开始编写和运行代码
+              </p>
+              <button
+                onClick={() => {
+                  if (onOpenEditor) {
+                    // 准备初始代码模板
+                    const template = resource.resource_content ? {
+                      'index.html': resource.resource_content
+                    } : undefined;
+                    
+                    onOpenEditor({
+                      mode: 'practice',
+                      title: resource.title,
+                      template: template
+                    });
+                    
+                    // 关闭资源弹窗
+                    setShowResource(false);
+                  } else {
+                    alert('编辑器功能暂不可用');
+                  }
+                }}
+                style={{
+                  padding: '12px 32px',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  color: 'white',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  transition: 'transform 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+              >
+                <Code size={20} />
+                打开编译器
+              </button>
+              {resource.resource_content && (
+                <div style={{
+                  marginTop: '20px',
+                  padding: '15px',
+                  backgroundColor: 'white',
+                  borderRadius: '8px',
+                  textAlign: 'left'
+                }}>
+                  <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '8px' }}>
+                    📝 初始代码模板预览：
+                  </p>
+                  <pre style={{
+                    backgroundColor: '#f8fafc',
+                    padding: '12px',
+                    borderRadius: '6px',
+                    overflow: 'auto',
+                    fontSize: '13px',
+                    fontFamily: 'monospace',
+                    maxHeight: '200px'
+                  }}>
+                    {resource.resource_content}
+                  </pre>
+                </div>
+              )}
             </div>
           </div>
         );
